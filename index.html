@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Content Factory Operator</title>
+<style>
+:root{
+  --ink:#07060c; --panel:#0e0c17; --panel2:#141122; --raise:#191530;
+  --line:#221d38; --line2:#2e2750;
+  --text:#e9e6f5; --dim:#8b85a6; --faint:#5c5779;
+  --accent:#8b6cff; --accent-soft:rgba(139,108,255,.14);
+  --good:#4fd18b; --bad:#ff5f7a; --warn:#ffb545;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink); color:var(--text); font-family:var(--sans);
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:radial-gradient(900px 500px at 78% -8%, rgba(139,108,255,.11), transparent 70%);
+}
+a{color:var(--accent); text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ---------- shell ---------- */
+.shell{position:relative; z-index:1; display:flex; min-height:100vh}
+.side{
+  width:246px; flex:0 0 246px; border-right:1px solid var(--line);
+  padding:22px 16px 60px; position:sticky; top:0; height:100vh; overflow-y:auto;
+  background:rgba(10,8,18,.6);
+}
+.brand{display:flex; align-items:baseline; gap:8px; padding:0 8px 20px}
+.brand b{font-size:16px; letter-spacing:-.02em}
+.brand span{font-family:var(--mono); font-size:10px; color:var(--faint); letter-spacing:.14em}
+.navgroup{font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--faint); padding:16px 8px 7px}
+.side a.nav{
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  padding:7px 9px; border-radius:6px; color:var(--dim); font-size:14px; text-decoration:none;
+}
+.side a.nav:hover{background:var(--panel2); color:var(--text)}
+.side a.nav.on{background:var(--accent-soft); color:#fff}
+.side a.nav .tag{font-family:var(--mono); font-size:10px; color:var(--faint)}
+.side a.nav.on .tag{color:var(--accent)}
+
+.main{flex:1; min-width:0; padding:0 0 120px}
+.topbar{
+  position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:14px;
+  padding:12px 30px; border-bottom:1px solid var(--line);
+  background:rgba(7,6,12,.86); backdrop-filter:blur(10px);
+}
+.crumb{font-family:var(--mono); font-size:11px; letter-spacing:.13em; color:var(--faint)}
+.crumb b{color:var(--dim); font-weight:400}
+.spacer{flex:1}
+.btn{
+  font-family:var(--mono); font-size:11px; letter-spacing:.08em; color:var(--dim);
+  background:var(--panel2); border:1px solid var(--line); padding:6px 11px; border-radius:5px; cursor:pointer;
+}
+.btn:hover{border-color:var(--line2); color:var(--text)}
+.btn.pri{background:var(--accent-soft); border-color:#3b2d70; color:#c9b9ff}
+.counter{font-family:var(--mono); font-size:11px; color:var(--faint)}
+.counter b{color:var(--accent); font-weight:400}
+
+.wrap{max-width:880px; padding:38px 30px 0}
+.page{display:none}
+.page.on{display:block}
+
+/* ---------- type ---------- */
+h1{font-size:31px; line-height:1.15; letter-spacing:-.025em; margin:0 0 10px; font-weight:650}
+h2{
+  font-size:19px; letter-spacing:-.015em; margin:44px 0 12px; font-weight:600;
+  padding-bottom:9px; border-bottom:1px solid var(--line);
+}
+h3{font-size:15px; margin:26px 0 8px; font-weight:600; letter-spacing:-.01em}
+.eyebrow{font-family:var(--mono); font-size:10px; letter-spacing:.18em; color:var(--accent); margin:0 0 10px}
+.lede{color:var(--dim); font-size:16px; max-width:64ch; margin:0 0 6px}
+p{max-width:70ch; margin:0 0 12px}
+ul,ol{max-width:70ch; margin:0 0 14px; padding-left:20px}
+li{margin:0 0 6px}
+li::marker{color:var(--faint)}
+strong{color:#fff; font-weight:600}
+code{font-family:var(--mono); font-size:12.5px; background:var(--panel2); border:1px solid var(--line); padding:1px 5px; border-radius:4px; color:#c9b9ff}
+.small{font-size:13px; color:var(--dim)}
+hr{border:0; border-top:1px solid var(--line); margin:34px 0}
+
+/* ---------- devices ---------- */
+.rule{border-left:2px solid var(--line2); padding:2px 0 2px 16px; margin:0 0 18px}
+.rule.good{border-color:var(--good)}
+.rule.bad{border-color:var(--bad)}
+.rule.key{border-color:var(--accent)}
+.rule h3{margin-top:0}
+
+.callout{
+  background:var(--panel); border:1px solid var(--line); border-left:2px solid var(--accent);
+  padding:14px 16px; margin:0 0 20px; border-radius:0 6px 6px 0;
+}
+.callout .k{font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--accent); display:block; margin-bottom:6px}
+.callout.hot{border-left-color:var(--bad)} .callout.hot .k{color:var(--bad)}
+.callout p:last-child,.callout ul:last-child{margin-bottom:0}
+
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:0 0 20px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+
+.card{background:var(--panel); border:1px solid var(--line); border-radius:7px; padding:15px 16px}
+.card h3{margin-top:0}
+.card p:last-child,.card ul:last-child{margin-bottom:0}
+
+.chip{
+  display:inline-block; font-family:var(--mono); font-size:10px; letter-spacing:.1em;
+  padding:3px 8px; border-radius:4px; border:1px solid var(--line2); color:var(--dim); margin:0 6px 6px 0;
+}
+.chip.a{color:#c9b9ff; border-color:#3b2d70; background:var(--accent-soft)}
+.chip.g{color:var(--good); border-color:#1e5c40}
+.chip.b{color:var(--bad); border-color:#6b2436}
+.chip.w{color:var(--warn); border-color:#6b4d18}
+
+table{width:100%; border-collapse:collapse; margin:0 0 20px; font-size:14px}
+th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-family:var(--mono); font-size:10px; letter-spacing:.14em; color:var(--faint); font-weight:400}
+tbody tr:hover{background:var(--panel)}
+
+/* prompt blocks */
+.prompt{position:relative; background:#0b0916; border:1px solid var(--line); border-radius:7px; margin:0 0 18px}
+.prompt .ph{
+  display:flex; align-items:center; gap:10px; padding:8px 12px; border-bottom:1px solid var(--line);
+  font-family:var(--mono); font-size:10px; letter-spacing:.14em; color:var(--faint);
+}
+.prompt pre{
+  margin:0; padding:13px 14px; font-family:var(--mono); font-size:12.5px; line-height:1.6;
+  white-space:pre-wrap; color:#cfc8ea; overflow-x:auto;
+}
+.copy{margin-left:auto; background:none; border:1px solid var(--line); color:var(--dim); font-family:var(--mono); font-size:10px; padding:3px 8px; border-radius:4px; cursor:pointer}
+.copy:hover{color:var(--text); border-color:var(--line2)}
+
+/* steps */
+ol.steps{list-style:none; padding:0; counter-reset:s; max-width:74ch}
+ol.steps>li{counter-increment:s; position:relative; padding:0 0 16px 40px; border-left:1px solid var(--line); margin:0 0 0 12px}
+ol.steps>li:last-child{border-left-color:transparent}
+ol.steps>li::before{
+  content:counter(s,decimal-leading-zero); position:absolute; left:-13px; top:0;
+  width:26px; height:26px; border-radius:50%; background:var(--panel2); border:1px solid var(--line2);
+  font-family:var(--mono); font-size:10px; color:var(--dim); display:grid; place-items:center;
+}
+ol.steps>li b{display:block; margin-bottom:3px}
+
+/* collapse */
+details.fold{border:1px solid var(--line); border-radius:7px; background:var(--panel); margin:0 0 14px}
+details.fold>summary{
+  cursor:pointer; padding:12px 15px; list-style:none; display:flex; align-items:center; gap:10px;
+  font-weight:600; font-size:14px;
+}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"+"; font-family:var(--mono); color:var(--accent); font-size:13px}
+details.fold[open]>summary::before{content:"–"}
+details.fold>summary .s{font-family:var(--mono); font-size:10px; color:var(--faint); letter-spacing:.1em; margin-left:auto}
+.foldbody{padding:0 15px 14px; border-top:1px solid var(--line); margin-top:0; padding-top:14px}
+
+/* ---------- media slots ---------- */
+.slots{display:grid; gap:12px; margin:0 0 20px}
+.slots.two{grid-template-columns:1fr 1fr}
+.slots.three{grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.slots.two,.slots.three{grid-template-columns:1fr}}
+.slot{
+  border:1px dashed var(--line2); border-radius:7px; background:var(--panel);
+  min-height:118px; display:flex; flex-direction:column; overflow:hidden; position:relative;
+}
+.slot.filled{border-style:solid}
+.slot.good{border-color:#245a41} .slot.bad{border-color:#5f2233}
+.slot.drag{border-color:var(--accent); background:var(--accent-soft)}
+.slot .shead{
+  display:flex; align-items:center; gap:8px; padding:8px 10px;
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.13em; color:var(--faint); border-bottom:1px solid var(--line);
+}
+.slot.good .shead .lbl{color:var(--good)} .slot.bad .shead .lbl{color:var(--bad)}
+.slot .sid{margin-left:auto; opacity:.55}
+.slot .sbody{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px; gap:6px; min-height:170px; background:
+  repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 8px, transparent 8px 16px);}
+.slot .ghost{width:34px; height:28px; border:1.5px solid var(--line2); border-radius:3px; position:relative; margin-bottom:2px}
+.slot .ghost::before{content:""; position:absolute; left:5px; bottom:4px; width:0; height:0;
+  border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:11px solid var(--line2)}
+.slot .ghost::after{content:""; position:absolute; right:6px; top:5px; width:5px; height:5px; border-radius:50%; background:var(--line2)}
+.slot.good .ghost{border-color:#245a41} .slot.bad .ghost{border-color:#5f2233}
+.slot .why{font-size:13px; color:var(--dim); padding:0 12px 11px}
+.slot .why b{color:var(--text)}
+.slot button.add{
+  background:none; border:0; color:var(--faint); font-family:var(--mono); font-size:11px;
+  cursor:pointer; text-align:left; padding:0;
+}
+.slot button.add:hover{color:var(--accent)}
+.slot input.url{
+  width:100%; background:#0b0916; border:1px solid var(--line2); color:var(--text);
+  font-family:var(--mono); font-size:12px; padding:7px 9px; border-radius:5px;
+}
+.slot img,.slot video,.slot iframe{width:100%; display:block; background:#000; border:0}
+.slot img,.slot video{max-height:340px; object-fit:cover}
+.slot iframe{aspect-ratio:16/9}
+.linkcard{display:flex; gap:10px; align-items:center; padding:12px; background:#0b0916}
+.linkcard .dom{font-family:var(--mono); font-size:11px; color:var(--accent); word-break:break-all}
+.slot .kill{
+  position:absolute; top:6px; right:6px; z-index:3; background:rgba(7,6,12,.85); border:1px solid var(--line2);
+  color:var(--dim); width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:12px; line-height:1;
+}
+.slot .kill:hover{color:var(--bad); border-color:var(--bad)}
+
+/* modal */
+.mask{position:fixed; inset:0; background:rgba(4,3,8,.78); z-index:60; display:none; place-items:center; padding:24px}
+.mask.on{display:grid}
+.modal{width:min(760px,100%); background:var(--panel2); border:1px solid var(--line2); border-radius:9px; padding:20px}
+.modal h3{margin-top:0}
+.modal textarea{
+  width:100%; height:280px; background:#0b0916; border:1px solid var(--line); color:#cfc8ea;
+  font-family:var(--mono); font-size:12px; padding:12px; border-radius:6px; resize:vertical;
+}
+.modalfoot{display:flex; gap:8px; margin-top:12px}
+
+/* toast */
+.toast{
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--raise); border:1px solid var(--line2); color:var(--text);
+  font-family:var(--mono); font-size:11px; letter-spacing:.08em; padding:9px 15px; border-radius:6px;
+  opacity:0; transition:opacity .18s, transform .18s; z-index:80; pointer-events:none;
+}
+.toast.on{opacity:1; transform:translateX(-50%) translateY(0)}
+
+/* slot index table */
+td.mono,th.mono{font-family:var(--mono); font-size:11px}
+.dot{width:7px; height:7px; border-radius:50%; display:inline-block; background:var(--faint)}
+.dot.f{background:var(--good)}
+
+@media(max-width:900px){
+  .shell{flex-direction:column}
+  .side{width:100%; height:auto; position:static; border-right:0; border-bottom:1px solid var(--line); padding-bottom:16px}
+  .wrap{padding:26px 18px 0}
+  .topbar{padding:10px 18px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ================= showcase build: media system ================= */
+.slot{min-height:0}
+.slot.filled{border-style:solid; border-color:var(--line2)}
+.slot.good.filled{border-color:#245a41}
+.slot.bad.filled{border-color:#5f2233}
+
+.slot .media{position:relative; background:#000; display:block; width:100%; cursor:zoom-in}
+.slot .media img,.slot .media video{
+  display:block; width:100%; height:auto; max-height:460px;
+  object-fit:contain; background:#000; border:0;
+}
+.slot .media iframe{display:block; width:100%; aspect-ratio:16/9; border:0}
+.slot .media.tall img,.slot .media.tall video{max-height:520px}
+.slot .media .zoom{
+  position:absolute; right:7px; bottom:7px; z-index:2; pointer-events:none;
+  font-family:var(--mono); font-size:9px; letter-spacing:.12em; color:var(--dim);
+  background:rgba(7,6,12,.8); border:1px solid var(--line2); padding:3px 6px; border-radius:4px;
+}
+.slot video{cursor:default}
+
+.slot .src{
+  display:flex; align-items:center; gap:7px; padding:8px 10px;
+  border-top:1px solid var(--line); background:#0b0916;
+  font-family:var(--mono); font-size:10px; letter-spacing:.09em;
+}
+.slot .src a{color:var(--accent); word-break:break-all; text-decoration:none}
+.slot .src a:hover{text-decoration:underline}
+.slot .src .k{color:var(--faint); flex:0 0 auto}
+.slot .note{font-size:12.5px; color:var(--dim); padding:9px 10px 0}
+.slot .note b{color:var(--text)}
+
+/* admin-only chrome (?admin=1) */
+.admin-only{display:none !important}
+body.admin .counter.admin-only{display:inline !important}
+body.admin a.nav.admin-only{display:flex !important}
+
+/* lightbox */
+.lb{position:fixed; inset:0; z-index:90; background:rgba(4,3,8,.93); display:none;
+    align-items:center; justify-content:center; padding:26px; flex-direction:column; gap:12px}
+.lb.on{display:flex}
+.lb img,.lb video{max-width:100%; max-height:78vh; display:block; background:#000; border-radius:6px}
+.lb .lbbar{display:flex; align-items:center; gap:14px; font-family:var(--mono); font-size:11px;
+  letter-spacing:.1em; color:var(--dim); max-width:100%}
+.lb .lbbar a{color:var(--accent); word-break:break-all}
+.lb .lbclose{position:fixed; top:16px; right:18px; background:var(--panel2); border:1px solid var(--line2);
+  color:var(--text); width:32px; height:32px; border-radius:6px; cursor:pointer; font-size:15px; line-height:1}
+.lb .lbclose:hover{border-color:var(--accent)}
+
+@media(max-width:820px){
+  .slot .media img,.slot .media video{max-height:70vh}
+}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+<nav class="side">
+  <div class="brand"><b>Content Factory</b><span>OPERATOR</span></div>
+
+  <div class="navgroup">START</div>
+  <a class="nav" href="#start">Read this first</a>
+  <a class="nav" href="#anatomy">Anatomy of a video</a>
+
+  <div class="navgroup">FOUNDATIONS</div>
+  <a class="nav" href="#types">The four content types</a>
+  <a class="nav" href="#refs">Reference images<span class="tag">01</span></a>
+  <a class="nav" href="#posts">Posts &amp; carousels<span class="tag">02</span></a>
+  <a class="nav" href="#recreated">Recreated videos<span class="tag">03</span></a>
+  <a class="nav" href="#builds">Fresh videos<span class="tag">04</span></a>
+
+  <div class="navgroup">THE APP</div>
+  <a class="nav" href="#basics">Basics — what matters now</a>
+  <a class="nav" href="#rest">Everything else</a>
+
+  <div class="navgroup">DO THE WORK</div>
+  <a class="nav" href="#w-refs">Make reference images<span class="tag">1</span></a>
+  <a class="nav" href="#w-carousel">Make a carousel<span class="tag">1</span></a>
+  <a class="nav" href="#w-factory">Factory from prompt bank<span class="tag">2</span></a>
+  <a class="nav" href="#w-recreate">Recreate from Ideas<span class="tag">2</span></a>
+  <a class="nav" href="#w-capcut">Fresh video in CapCut<span class="tag">3</span></a>
+
+  <div class="navgroup">PROVE IT</div>
+  <a class="nav" href="#test">The test</a>
+  <a class="nav" href="#bar">Week one &amp; the bar</a>
+  <a class="nav admin-only" href="#index">Media slot index</a>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="crumb">CONTENT FACTORY <b id="crumb">/ READ THIS FIRST</b></div>
+    <div class="spacer"></div>
+    <span class="counter admin-only"><b id="filled">0</b> / <span id="total">0</span> slots filled</span>
+  </div>
+
+  <div class="wrap">
+
+<!-- ============================= START ============================= -->
+<section class="page" id="p-start">
+  <p class="eyebrow">READ THIS FIRST</p>
+  <h1>We make content that gets watched or we make nothing.</h1>
+  <p class="lede">This is the whole job in one page. Everything after it is detail.</p>
+
+  <div class="card" style="border-color:#3b2d70; margin:18px 0 22px">
+    <div style="font-size:58px; line-height:1; font-weight:650; letter-spacing:-.035em">$1M<span style="font-size:22px; color:var(--dim); font-weight:400; letter-spacing:0"> / month</span></div>
+    <div style="font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--accent); margin:8px 0 10px">REVENUE &middot; THE TARGET</div>
+    <p class="small" style="margin:0">That is the number this whole operation is built to hit. Every rule, every quota and every workflow in this document is reverse-engineered from it. Views are the mechanism; this is the point.</p>
+  </div>
+
+  <div class="callout">
+    <span class="k">THE JOB</span>
+    <p>You are the backbone of the whole thing. Every account, every follower, every dollar of inbound revenue sits on top of what comes out of your hands. There is nothing underneath you holding it up.</p>
+    <p>The target is millions of views, not thousands. Every niche we are in has someone else in it doing this right now, and the only thing between us and them is what we put out this week.</p>
+    <p>It is not only production. You are expected to think — new concepts, new directions, new moves, and how the dashboard itself should work. If something is slow or stupid, say so. Everyone's mind and everyone's words matter here, and the best calls we have made came from every seat in the room.</p>
+  </div>
+
+  <h2>The five rules</h2>
+  <div class="rule key">
+    <h3>1 &mdash; Always ask questions</h3>
+    <p>Why do we do it like this? Can we not change it? Let's try this. I don't know how to do this, help. How do we do this?</p>
+    <p>All of it matters and it matters a lot. Nobody loses anything by asking. The only expensive thing is a week of work built on a guess nobody checked.</p>
+  </div>
+  <div class="rule key">
+    <h3>2 &mdash; She must feel real</h3>
+    <p><strong>Every single piece of content must feel real.</strong> Any signal of AI is terrible. Get used to creating AI content that feels real &mdash; the speech, the small things in the background, fake logos, anything.</p>
+    <p>People see this, it ruins credibility, and it can kill a model quick.</p>
+  </div>
+  <div class="rule key">
+    <h3>3 &mdash; Every second of a video matters</h3>
+    <p>Hook, lead, CTA. If a second does none of those three jobs, cut it.</p>
+  </div>
+  <div class="rule key">
+    <h3>4 &mdash; The niche decides everything</h3>
+    <p>She is not a girl. She is an F1 girl, a flight attendant, a cosplayer, a construction girl. Content that could belong to any account belongs to no account.</p>
+    <p>And the niche only holds if she feels real inside it. On-niche content that reads as generated is worth nothing &mdash; see rule 2.</p>
+  </div>
+  <div class="rule key">
+    <h3>5 &mdash; Reference images are the foundation</h3>
+    <p>Every picture and every video is built off them. A weak reference set poisons months of output and nobody notices until the account is dead. Get these right before you make anything else.</p>
+  </div>
+
+  <h2>How your day is built</h2>
+  <p>Tasks land in <strong>The Line</strong>. Each one has a weight. A full day is a selection of them, split by importance.</p>
+  <div class="slots">
+    <div class="slot wide" data-slot="line-weights" data-label="TASK WEIGHTS" data-why="The task list and what each one is worth"></div>
+  </div>
+  <p class="small">A task might be “make 40 videos for Kira today” — how you get there is yours. It might be “recreate these exact five, one to one” — then it is exactly those five. Quality is on you.</p>
+
+  <h2>Standing volume rule</h2>
+  <ul>
+    <li>Make <strong>~2 variations of every video type</strong> you produce. One version is a guess. Two is a test.</li>
+    <li>Always generate more than you need. You have two eyes and one opinion — you will pick wrong sometimes.</li>
+    <li>After week one the standing quota is <strong>40 successful videos and 20 carousel images a day</strong>. <a href="#bar">See the bar →</a></li>
+  </ul>
+</section>
+
+<!-- ============================= ANATOMY ============================= -->
+<section class="page" id="p-anatomy">
+  <p class="eyebrow">FOUNDATIONS</p>
+  <h1>Anatomy of a video</h1>
+  <p class="lede">Three jobs. Every second belongs to one of them or it gets cut.</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 style="color:var(--accent)">Hook</h3>
+      <p class="small">Buys attention. Text on screen, a face mid-motion, a line you have to finish hearing. It happens inside the first second — not the first three.</p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--accent)">Lead</h3>
+      <p class="small">Keeps attention. Delivers whatever the hook promised: the joke, the reveal, the information, the look. Dead air here kills the video.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:20px">
+    <h3 style="color:var(--accent)">CTA</h3>
+    <p class="small">Cashes attention in. Two forms:</p>
+    <ul class="small">
+      <li><strong>Explicit</strong> — comment this, follow for part two, tap the profile. Works after you have given real value: a laugh, information, dopamine.</li>
+      <li><strong>Implicit</strong> — the whole video is the CTA. It retains or polarises hard enough that people comment and check the account without being asked. This is the higher ceiling.</li>
+    </ul>
+  </div>
+
+  <div class="callout hot">
+    <span class="k">FAILURE MODE</span>
+    <p>A video with a hook and a lead and no CTA gets views and no followers. A video with a CTA and a weak hook gets nothing at all. In that order.</p>
+  </div>
+
+  <h2>The feeling</h2>
+  <p>Every video that goes viral has a methodology behind it. You will not get it from a list. You get it by making enough of them that you develop the feel, and then you have it for good.</p>
+  <p>If you have ever been scrolling and thought <em>why am I still watching this</em> — that is a good fucking video. Work out what it did to you. Learn to build hooks that do the same thing to someone else, and you stop being the person scrolling and become the person behind the viral account.</p>
+
+  <h2>Reference cuts</h2>
+  <p class="small">Drop videos here that show each job done properly.</p>
+  <div class="slots three">
+    <div class="slot" data-slot="anat-hook" data-label="HOOK" data-why="What makes the first second work"></div>
+    <div class="slot" data-slot="anat-lead" data-label="LEAD" data-why="How retention is held"></div>
+    <div class="slot" data-slot="anat-cta" data-label="CTA" data-why="What the viewer is asked to do"></div>
+  </div>
+</section>
+
+<!-- ============================= TYPES ============================= -->
+<section class="page" id="p-types">
+  <p class="eyebrow">FOUNDATIONS</p>
+  <h1>The four content types</h1>
+  <p class="lede">Everything we produce is one of these four. Know which one you are making before you open anything.</p>
+
+  <table>
+    <thead><tr><th>TYPE</th><th>WHAT IT IS</th><th>WHY IT EXISTS</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><a href="#refs"><strong>Reference images</strong></a></td>
+        <td>The locked set of images that define what the model looks like.</td>
+        <td>Every other asset is generated from them. Nothing works without them.</td>
+      </tr>
+      <tr>
+        <td><a href="#posts"><strong>Posts &amp; carousels</strong></a></td>
+        <td>Stills of her day to day, grouped into posts.</td>
+        <td>The profile. Proves she is a person with a life, and shows her off.</td>
+      </tr>
+      <tr>
+        <td><a href="#recreated"><strong>Recreated videos</strong></a></td>
+        <td>A proven viral video rebuilt with our model as the subject.</td>
+        <td>The idea is already tested. You are only swapping who is in it. Highest hit rate.</td>
+      </tr>
+      <tr>
+        <td><a href="#builds"><strong>Fresh videos</strong></a></td>
+        <td>New videos assembled from clips you generate, cut in CapCut.</td>
+        <td>Original angles nobody has made for the niche. Highest ceiling.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>How they feed each other</h2>
+  <ul>
+    <li>Reference images → feed <strong>everything</strong>. Posts, carousels, recreations, fresh videos.</li>
+    <li>Posts &amp; carousels → build the profile a video sends people to. A great video pointing at an empty grid earns nothing.</li>
+    <li>Recreated → the volume engine. Half of output, ours and other people's.</li>
+    <li>Fresh videos → where new proven formats come from. Today's fresh video is next month's recreation.</li>
+  </ul>
+</section>
+
+<!-- ============================= REFERENCE IMAGES ============================= -->
+<section class="page" id="p-refs">
+  <p class="eyebrow">CONTENT TYPE 01</p>
+  <h1>Reference images</h1>
+  <p class="lede">The images used to generate every picture and every video of a model. The most important asset in onboarding, and the one people rush.</p>
+
+  <div class="slots three">
+    <div class="slot" data-slot="ref-set-1" data-label="REFERENCE SET 01" data-why="Hero face image"></div>
+    <div class="slot" data-slot="ref-set-2" data-label="REFERENCE SET 02" data-why="Niche outfit, full body"></div>
+    <div class="slot" data-slot="ref-set-3" data-label="REFERENCE SET 03" data-why="Second setting, same identity"></div>
+  </div>
+
+  <h2>What a reference set must be</h2>
+  <div class="rule good">
+    <h3>Face</h3>
+    <ul>
+      <li>Clear, unobstructed, well lit. No crop, no hair across it, no extreme angle.</li>
+      <li>Either her <strong>real face</strong>, or a <strong>consistent altered face</strong> she has approved — pick one and lock it forever.</li>
+      <li>One image is the <strong>hero</strong>: highest quality, most neutral, used as the identity anchor on nearly every generation. The rest are add-ons.</li>
+    </ul>
+  </div>
+  <div class="rule good">
+    <h3>Body</h3>
+    <ul>
+      <li>Full body in the frame. Half-body references produce broken generations.</li>
+      <li>Consistent proportions across the whole set. If she changes shape between images, the AI will change her shape in the output.</li>
+    </ul>
+  </div>
+  <div class="rule good">
+    <h3>Niche coverage</h3>
+    <ul>
+      <li>One reference for <strong>every setting or experience the niche can produce</strong>.</li>
+      <li>Cosplayer → several costumes. Flight attendant → uniform, layover, off-duty. Construction girl → site, van, home. F1 girl → paddock, garage, grid.</li>
+      <li>If you cannot name what she is doing in the image, the image is not covering anything.</li>
+    </ul>
+  </div>
+  <div class="rule good">
+    <h3>Feel</h3>
+    <ul>
+      <li><strong>Candid and human.</strong> She is a person, not a product render. Slight imperfection reads as real.</li>
+      <li><strong>Sexy is not optional.</strong> It is the reason the account exists.</li>
+      <li>Variation in outfit, setting and expression across the set — same person, different moments.</li>
+    </ul>
+  </div>
+
+  <h2>Real face vs altered face</h2>
+  <table>
+    <thead><tr><th></th><th>REAL FACE</th><th>ALTERED FACE</th></tr></thead>
+    <tbody>
+      <tr><td><strong>When</strong></td><td>She is fine appearing as herself.</td><td>She is not. You build a face close to hers that she approves.</td></tr>
+      <tr><td><strong>Difficulty</strong></td><td>Low. The face is already consistent.</td><td>High. Every generation drifts a little; the drift compounds.</td></tr>
+      <tr><td><strong>Rule</strong></td><td>Use her real material as widely as possible.</td><td>Approve the face once, then never regenerate it from scratch. Always build from the locked hero image.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout hot">
+    <span class="k">THE CONSTRAINT NOBODY GETS AROUND</span>
+    <p>Every model sends different source photos, in different outfits, in different settings, at different quality. You work with what she gives you. There is no standard input, so build the set around <em>her</em> material instead of forcing a template onto it.</p>
+  </div>
+
+  <h2>Good</h2>
+  <div class="slots three">
+    <div class="slot good" data-slot="ref-good-1" data-label="HERO FACE" data-why="Clear face, full body, obviously her"></div>
+    <div class="slot good" data-slot="ref-good-2" data-label="NICHE OUTFIT" data-why="Niche readable at a glance, full outfit visible"></div>
+    <div class="slot good" data-slot="ref-good-3" data-label="CANDID" data-why="Reads as a real photo of a real person"></div>
+  </div>
+
+  <h2>Bad</h2>
+  <div class="slots three">
+    <div class="slot bad" data-slot="ref-bad-1" data-label="FACE UNUSABLE" data-why="Cropped, obscured or badly lit — nothing downstream can use it"></div>
+    <div class="slot bad" data-slot="ref-bad-2" data-label="GENERIC" data-why="Could be any girl on any account. Says nothing about the niche"></div>
+    <div class="slot bad" data-slot="ref-bad-3" data-label="IDENTITY DRIFT" data-why="Two images, two different people. Kills the account slowly"></div>
+  </div>
+
+
+  <h2>Non-negotiables</h2>
+  <p>
+    <span class="chip g">CLEAR FACE</span><span class="chip g">FULL BODY</span><span class="chip g">CONSISTENT</span>
+    <span class="chip g">NICHE-SPECIFIC</span><span class="chip g">CANDID</span><span class="chip g">SEXY</span>
+    <span class="chip g">5–6 MINIMUM</span><span class="chip b">NO CROPPED FACES</span><span class="chip b">NO DRIFT</span>
+  </p>
+  <p><a href="#w-refs">→ Walkthrough: how to make them</a></p>
+</section>
+
+<!-- ============================= POSTS ============================= -->
+<section class="page" id="p-posts">
+  <p class="eyebrow">CONTENT TYPE 02</p>
+  <h1>Posts &amp; carousels</h1>
+  <p class="lede">Her day to day. An inside look at her life, and a clear look at her. This is what a stranger judges the whole account on.</p>
+
+  <div class="slots three">
+    <div class="slot" data-slot="post-feed-1" data-label="FEED 01" data-why="How the grid reads top to bottom"></div>
+    <div class="slot" data-slot="post-feed-2" data-label="FEED 02" data-why=""></div>
+    <div class="slot" data-slot="post-feed-3" data-label="FEED 03" data-why=""></div>
+  </div>
+
+  <h2>The three rules</h2>
+  <div class="rule good">
+    <h3>1 — She is doing something</h3>
+    <p>A niche activity, with a light showing of a hobby. Not posing. Doing.</p>
+  </div>
+  <div class="rule good">
+    <h3>2 — It tells a story</h3>
+    <p>You can say what is happening the instant you see it. If you have to think, the viewer has already scrolled.</p>
+  </div>
+  <div class="rule good">
+    <h3>3 — It leads on to something observable</h3>
+    <p>There is a next thing. A place she is going, a thing she is about to do, a person off-frame. It opens rather than closes.</p>
+  </div>
+  <p>They should be interesting and attractive at the same time. Never one without the other.</p>
+
+  <div class="callout hot">
+    <span class="k">THE MISTAKE</span>
+    <p>Normal photos of her doing nothing in particular. She is not anyone — she is a specific person with a specific life. Generic stills make a generic account, and a generic account earns nothing.</p>
+  </div>
+
+  <h2>Sourcing — where the friction lives</h2>
+  <ul>
+    <li>Source images come from <strong>Pinterest</strong>. We do not use the models' real photos for posts.</li>
+    <li>Pick source images where the subject <strong>already looks like the model</strong>. Less to fix, less drift.</li>
+    <li>Pick source images where the <strong>niche is already present</strong>. Building an F1 lifestyle carousel out of a League of Legends cosplay still is a fight you chose. A girl who rides motorbikes, in a room full of helmets, is free.</li>
+    <li>Reference images and reference videos are everything. A bad reference costs an hour and still comes out wrong.</li>
+  </ul>
+
+  <h2>The two prompts</h2>
+  <div class="prompt">
+    <div class="ph">LIFESTYLE POST · HER FACE ON ANOTHER PHOTO<button class="copy">COPY</button></div>
+<pre>put face of girl one onto face of girl 2
+
+maintain photo 2 photo quality and outfit or subject, keep it natural</pre>
+  </div>
+  <div class="prompt">
+    <div class="ph">NICHE LIFESTYLE POST · FACE + OUTFIT ONTO ANOTHER PHOTO<button class="copy">COPY</button></div>
+<pre>put subject identity of girl one onto subject identity of person 2
+
+maintain girl 1 outfit
+
+maintain photo 2 photo quality and setting
+
+*keep it natural*</pre>
+  </div>
+  <p class="small">Write the prompt to fit the output you already decided on. Do not generate first and decide after.</p>
+
+  <div class="callout">
+    <span class="k">WARDROBE</span>
+    <p>Mix her niche outfit with ordinary day-to-day clothes. Nobody wears the same thing or posts the same kind of picture every single day, and an account that does looks like a bot.</p>
+  </div>
+
+  <h2>Settings that work</h2>
+  <ul>
+    <li>Batch at <strong>3 / 16</strong> — the highest hit rate we have found.</li>
+    <li><strong>Friend images</strong> perform. They express a life outside the camera and read as wholesome, which buys you room to be sexy elsewhere.</li>
+    <li>Fresh and specifically different scores extra. Common girl-posts are the floor, not the target.</li>
+  </ul>
+
+  <h2>Good</h2>
+  <div class="slots three">
+    <div class="slot good" data-slot="post-good-1" data-label="STORY" data-why="You can name what she is doing in under a second"></div>
+    <div class="slot good" data-slot="post-good-2" data-label="NICHE ACTIVITY" data-why="The niche does the work, not the caption"></div>
+    <div class="slot good" data-slot="post-good-3" data-label="FRIENDS" data-why="Life outside the frame. Wholesome, high performing"></div>
+  </div>
+
+  <h2>Bad</h2>
+  <div class="slots three">
+    <div class="slot bad" data-slot="post-bad-1" data-label="NO STORY" data-why="A picture of a girl. Nothing is happening"></div>
+    <div class="slot bad" data-slot="post-bad-2" data-label="NICHE MISMATCH" data-why="Source image fought the niche and lost"></div>
+    <div class="slot bad" data-slot="post-bad-3" data-label="BAD SOURCE" data-why="Source subject looked nothing like her. The face never landed"></div>
+  </div>
+
+  <p><a href="#w-carousel">→ Walkthrough: how to make a carousel</a></p>
+</section>
+
+<!-- ============================= RECREATED ============================= -->
+<section class="page" id="p-recreated">
+  <p class="eyebrow">CONTENT TYPE 03</p>
+  <h1>Recreated videos</h1>
+  <p class="lede">A viral video, rebuilt with our model as the subject. The idea is proven before you start. This is the core skill and half of everything you ship.</p>
+
+  <div class="slots three">
+    <div class="slot" data-slot="rec-top-1" data-label="RECREATION 01" data-why="Original → our version"></div>
+    <div class="slot" data-slot="rec-top-2" data-label="RECREATION 02" data-why=""></div>
+    <div class="slot" data-slot="rec-top-3" data-label="RECREATION 03" data-why=""></div>
+  </div>
+
+  <h2>What it is</h2>
+  <ul>
+    <li>A reference video goes into <strong>Seedance</strong> or <strong>Wan</strong> with the model's reference image. Only the character changes.</li>
+    <li>Spot a viral that relates to the niche → you can recreate it around <strong>80% of the time</strong>. The failure cases are format, not idea: heavy cuts, many subjects, extreme camera work.</li>
+    <li>The original already earned its views. You are borrowing proof, not guessing.</li>
+    <li><strong>It does not have to be someone else's video.</strong> One of our own that performed is a reference video like any other — recreate our winners across models and niches.</li>
+  </ul>
+
+  <div class="callout">
+    <span class="k">PER MODEL, NOT PER LIBRARY</span>
+    <p>Every model is a different person, in a different niche, with a different ICP. One model's reference video is not another's. Some are general or funny enough to overlap — most are not. Never batch the same reference across the roster without checking it.</p>
+  </div>
+
+  <h2>Audio</h2>
+  <ul>
+    <li>The recreated render usually has the wrong sound, or none.</li>
+    <li>Standard fix: take it into <strong>CapCut</strong> and stitch the new render over the original video so the original audio survives.</li>
+    <li>You can also build audio from scratch. That is a choice, not a requirement.</li>
+  </ul>
+
+  <h2>The split</h2>
+  <div class="callout">
+    <span class="k">STANDING RULE</span>
+    <p><strong>50% recreated / 50% fresh.</strong> Proven is proven — it performed once and will most likely perform again. The other half has to be fresh because fresh is how new formats get tested, and a tested fresh video becomes next month's proven one.</p>
+  </div>
+
+  <h2>Good</h2>
+  <div class="slots three">
+    <div class="slot good" data-slot="rec-good-1" data-label="THE ORIGINAL" data-why="The source video and why it went viral"></div>
+    <div class="slot good" data-slot="rec-good-2" data-label="OUR RECREATION" data-why="Same beats, our model, audio preserved"></div>
+    <div class="slot good" data-slot="rec-good-3" data-label="OUR OWN WINNER, REUSED" data-why="One of ours, recreated for another model"></div>
+  </div>
+
+  <h2>Bad</h2>
+  <div class="slots three">
+    <div class="slot bad" data-slot="rec-bad-1" data-label="WRONG FORMAT" data-why="Original was uncopyable — too many cuts or subjects"></div>
+    <div class="slot bad" data-slot="rec-bad-2" data-label="BROKEN SWAP" data-why="Movement, timing or identity fell apart in the render"></div>
+    <div class="slot bad" data-slot="rec-bad-3" data-label="AUDIO LOST" data-why="Render shipped with the wrong sound or none"></div>
+  </div>
+
+  <p><a href="#w-recreate">→ Walkthrough: how to recreate from the Ideas tab</a></p>
+</section>
+
+<!-- ============================= BUILDS ============================= -->
+<section class="page" id="p-builds">
+  <p class="eyebrow">CONTENT TYPE 04</p>
+  <h1>Fresh videos <span style="font-size:16px; color:var(--faint); font-weight:400">/ capcut videos</span></h1>
+  <p class="lede">New videos, assembled from clips you generate, cut in CapCut. Factory makes the pieces. CapCut makes the video.</p>
+
+  <div class="slots three">
+    <div class="slot" data-slot="build-top-1" data-label="FRESH VIDEO 01" data-why=""></div>
+    <div class="slot" data-slot="build-top-2" data-label="FRESH VIDEO 02" data-why=""></div>
+    <div class="slot" data-slot="build-top-3" data-label="FRESH VIDEO 03" data-why=""></div>
+  </div>
+
+  <h2>Where fresh videos come from</h2>
+  <ul>
+    <li>A <strong>proven concept you want to remake</strong> rather than copy — same idea, our angle.</li>
+    <li>An <strong>old video that needed rework</strong> — right idea, wrong execution.</li>
+    <li>A <strong>completely fresh concept</strong> nobody has made for the niche.</li>
+  </ul>
+  <p>One clip or many. The number of clips is a consequence of the idea, never the starting point.</p>
+
+  <h2>The pieces</h2>
+  <div class="slots three">
+    <div class="slot" data-slot="tool-scriptwriter" data-label="SCRIPTWRITER" data-why="Writes new prompts, or rewrites an existing one to hit a different idea"></div>
+    <div class="slot" data-slot="tool-ideas" data-label="IDEAS TAB" data-why="Where you go when a video can't be recreated, or you want to change it"></div>
+    <div class="slot" data-slot="tool-promptbank" data-label="PROMPT BANK" data-why="Prompts that already worked. Start here when the format is known"></div>
+  </div>
+  <div class="slots three">
+    <div class="slot" data-slot="tool-factory" data-label="FACTORY" data-why="Generates every clip"></div>
+    <div class="slot" data-slot="tool-editor" data-label="EDITOR" data-why="Finishes simple videos. Music, captions, trims. Enhance only"></div>
+    <div class="slot" data-slot="tool-capcut" data-label="CAPCUT" data-why="Builds videos that don't exist yet. Text, sound, filters, stacking"></div>
+  </div>
+
+
+  <div class="callout">
+    <span class="k">EDITOR VS CAPCUT</span>
+    <p>The Editor is a hammer. CapCut is a multi-tool. The hammer is fast and it does its one job well — a simple talking video showing her personality or interests, captioned, music on, sent. It cannot create anything that isn't already in the clip. When the video has to be <em>built</em>, you are in CapCut.</p>
+  </div>
+
+  <h2>Why this is the frontier</h2>
+  <ul>
+    <li>Recreations prove what works. Fresh videos are how you make something that has never been done for the niche.</li>
+    <li>Text, sound and filters used differently from the standard talking-head is where the reach is.</li>
+    <li>Together, recreations and fresh videos are what currently drives engagement and inbound revenue. Everything else supports them.</li>
+  </ul>
+
+  <h2>Good</h2>
+  <div class="slots three">
+    <div class="slot good" data-slot="build-good-1" data-label="SINGLE CLIP" data-why="One generation, made into a video by the edit"></div>
+    <div class="slot good" data-slot="build-good-2" data-label="MULTI CLIP" data-why="Several generations cut into one idea"></div>
+    <div class="slot good" data-slot="build-good-3" data-label="EDITOR ONLY" data-why="Simple talking video, finished in the Editor"></div>
+  </div>
+
+  <h2>Bad</h2>
+  <div class="slots three">
+    <div class="slot bad" data-slot="build-bad-1" data-label="OVERBUILT" data-why="Effort spent on the edit instead of the idea"></div>
+    <div class="slot bad" data-slot="build-bad-2" data-label="WEAK CLIPS" data-why="Edited around bad generations instead of regenerating them"></div>
+    <div class="slot bad" data-slot="build-bad-3" data-label="NO SHAPE" data-why="No hook, no lead, no reason to keep watching"></div>
+  </div>
+
+  <p><a href="#w-capcut">→ Walkthrough: fresh video in CapCut</a></p>
+</section>
+
+<!-- ============================= BASICS ============================= -->
+<section class="page" id="p-basics">
+  <p class="eyebrow">THE APP</p>
+  <h1>Basics — what matters now</h1>
+  <p class="lede">Six places. You will live in these every day. Everything else can wait until you need it.</p>
+
+  <h2>The Line</h2>
+  <ul>
+    <li>Every daily and weekly task, with the material and the information needed to complete it.</li>
+    <li>Your responsibilities in one place. If it is not in The Line it is not your job today.</li>
+    <li>Tasks range from open (<em>"make 40 videos for Kira"</em>) to exact (<em>"recreate these five, one to one, and these images"</em>).</li>
+    <li>On an open task, <strong>how</strong> is your call. The quality is on you — and a little on me.</li>
+    <li>Complete a task: tick every step → attach files if required → <strong>Send for review</strong>. It is then marked and closed off.</li>
+    <li>Review and Flow sit alongside it. Overdue is visible to everyone.</li>
+  </ul>
+  <div class="slots three">
+    <div class="slot" data-slot="app-line-1" data-label="THE LINE — LIST" data-why="Open, late, closed"></div>
+    <div class="slot" data-slot="app-line-2" data-label="A TASK OPEN" data-why="Steps, attachments, send for review"></div>
+    <div class="slot" data-slot="app-line-3" data-label="SENT FOR REVIEW" data-why="What a completed task looks like"></div>
+  </div>
+
+
+  <h2>Scripting</h2>
+  <ul>
+    <li><strong>Prompt bank</strong> — prompts that already produced good videos. Copy, adapt, reuse.</li>
+    <li><strong>Scriptwriter</strong> — where new prompts are written. Tag the model with <code>@</code> so it knows the niche.</li>
+    <li><strong>Showcase</strong> — what good looks like.</li>
+    <li><strong>Ideas</strong> — a constantly refreshed list of videos to recreate, per model. You can add ideas yourself. Add them.</li>
+  </ul>
+  <div class="slots three">
+    <div class="slot" data-slot="app-script-1" data-label="SCRIPTING MENU" data-why="Prompt bank, Scriptwriter, Showcase, Ideas"></div>
+    <div class="slot" data-slot="app-script-2" data-label="SCRIPTWRITER" data-why="Tagging a model and briefing it"></div>
+    <div class="slot" data-slot="app-script-3" data-label="IDEAS TAB" data-why="Fresh recreation targets per model"></div>
+  </div>
+
+
+  <h2>Factory</h2>
+  <ul>
+    <li>Where the video models live and where every render is created.</li>
+    <li>Every past video is here. The first render of something that later gets millions of views starts on this page.</li>
+    <li>Send a finished render onward with <strong>Ready to edit</strong> to reach the Editor.</li>
+  </ul>
+  <div class="slots three">
+    <div class="slot" data-slot="app-factory-1" data-label="FACTORY — GENERATE" data-why="Model, niche, references, prompt"></div>
+    <div class="slot" data-slot="app-factory-2" data-label="FACTORY — FEED" data-why="Renders and what to do with them"></div>
+    <div class="slot" data-slot="app-factory-3" data-label="READY TO EDIT" data-why="Sending a render onward"></div>
+  </div>
+
+
+  <h2>Pictures — Nano Banana</h2>
+  <ul>
+    <li>Where all images are made: reference images, backgrounds, posts, carousels.</li>
+    <li><strong>Lifestyle</strong> is the newer feature and it matters. It adds candid images of her actual life — her room, her collectibles, her city, her friends — and can be attached to images when you select them. It is what turns a set of pictures into a person.</li>
+    <li>Everyone uses different prompts. Some work consistently — ask for them. See <a href="#posts">the two standard prompts</a>.</li>
+  </ul>
+  <div class="slots three">
+    <div class="slot" data-slot="app-nano-1" data-label="NANO BANANA" data-why="Reference and post generation"></div>
+    <div class="slot" data-slot="app-nano-2" data-label="LIFESTYLE TAB" data-why="Candid life attached to a set"></div>
+    <div class="slot" data-slot="app-nano-3" data-label="A FINISHED BATCH" data-why="What comes back and what gets kept"></div>
+  </div>
+
+
+  <div class="callout">
+    <span class="k">AI IS A SANDBOX</span>
+    <p>Everything changes constantly and nothing works 100% of the time. Different jobs need different words and different tools. Take what works from everyone else, then build the method that suits you. Nobody here is going to hand you a prompt that works forever.</p>
+  </div>
+
+  <h2>Editor</h2>
+  <ul>
+    <li>For videos that are <strong>not</strong> recreations and not CapCut videos.</li>
+    <li>Template music, captions, light trims. It refines and sends off.</li>
+    <li>It only enhances. You cannot create anything new in it.</li>
+    <li>Best use: simple videos of the model talking, showing personality or interests.</li>
+    <li>Get videos into it from Factory → <strong>Ready to edit</strong>.</li>
+  </ul>
+  <div class="slots three">
+    <div class="slot" data-slot="app-editor-1" data-label="EDITOR" data-why="Captions, music, trim"></div>
+    <div class="slot" data-slot="app-editor-2" data-label="TEMPLATES" data-why="What is available in there"></div>
+    <div class="slot" data-slot="app-editor-3" data-label="FINISHED IN EDITOR" data-why="A simple talking video, done"></div>
+  </div>
+
+
+  <h2>Library</h2>
+  <ul>
+    <li>Every finished video and image lives here.</li>
+    <li>See what is <strong>ready to post</strong>, <strong>scheduled</strong> and <strong>posted</strong>, per account and per person, so you can check how your videos performed.</li>
+    <li>More importantly: this is where you <strong>upload anything finished outside the Factory</strong> — every recreation and every CapCut video.</li>
+    <li>Upload = pick the model → pick the niche → pick the platform (usually Facebook <em>and</em> Instagram) → upload.</li>
+  </ul>
+  <div class="callout hot">
+    <span class="k">GET THIS WRONG AND IT IS GONE</span>
+    <p>Model and niche must be correct on every upload and every <em>Ready to post</em>, for images and videos alike. Misallocated files do not error — they just quietly land somewhere nobody is looking, and the scheduler never sees them.</p>
+  </div>
+  <div class="slots three">
+    <div class="slot" data-slot="app-lib-1" data-label="LIBRARY" data-why="Ready, scheduled, posted"></div>
+    <div class="slot" data-slot="app-lib-2" data-label="UPLOAD VIDEO" data-why="Model, niche, platform"></div>
+    <div class="slot" data-slot="app-lib-3" data-label="FILTERS" data-why="Finding a specific video later"></div>
+  </div>
+
+</section>
+
+<!-- ============================= EVERYTHING ELSE ============================= -->
+<section class="page" id="p-rest">
+  <p class="eyebrow">THE APP</p>
+  <h1>Everything else</h1>
+  <p class="lede">Not needed on day one. Open these in your own time — two of them will change how you work.</p>
+
+  <details class="fold" open>
+    <summary>Spy <span class="s">USE THIS OFTEN</span></summary>
+    <div class="foldbody">
+      <ul>
+        <li>A scraper that surfaces performing videos across <strong>our accounts and other people's</strong>.</li>
+        <li>It is where proven, tested content comes from. Videos pulling hundreds of thousands to millions of views, sorted by niche, from any account added to it.</li>
+        <li>Being built out further. Even now, use it constantly — it feeds the recreated half of everything you ship.</li>
+      </ul>
+      <div class="slots three">
+        <div class="slot" data-slot="app-spy-1" data-label="SPY" data-why="Performing videos by niche"></div>
+        <div class="slot" data-slot="app-spy-2" data-label="A SPY FIND" data-why="What a good target looks like"></div>
+        <div class="slot" data-slot="app-spy-3" data-label="ADDING AN ACCOUNT" data-why="Pointing it at a competitor"></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="fold">
+    <summary>Launch control <span class="s">NEW</span></summary>
+    <div class="foldbody">
+      <ul>
+        <li>Tracks progress on projects and deliverables.</li>
+        <li>New. Expect it to become central.</li>
+      </ul>
+      <div class="slots"><div class="slot" data-slot="app-launch" data-label="LAUNCH CONTROL" data-why="Project and deliverable tracking"></div></div>
+    </div>
+  </details>
+
+  <details class="fold">
+    <summary>Accounts <span class="s">OUTSIDE THE FACTORY</span></summary>
+    <div class="foldbody">
+      <ul>
+        <li>Every live account for every niche, and how each one is progressing.</li>
+        <li>Use it to check how videos are performing across a specific niche rather than a single post.</li>
+      </ul>
+      <div class="slots"><div class="slot" data-slot="app-accounts" data-label="ACCOUNTS" data-why="Per-niche account performance"></div></div>
+    </div>
+  </details>
+
+  <details class="fold">
+    <summary>Usage <span class="s">UNDER MORE</span></summary>
+    <div class="foldbody">
+      <ul>
+        <li>API usage, cost per video, total spent, total created.</li>
+        <li>Check it before a big batch, not after.</li>
+      </ul>
+      <div class="slots"><div class="slot" data-slot="app-usage" data-label="USAGE" data-why="Cost per video and total spend"></div></div>
+    </div>
+  </details>
+
+  <details class="fold">
+    <summary>Copy bot, Review, Flow</summary>
+    <div class="foldbody">
+      <ul>
+        <li><strong>Copy bot</strong> — captions and copy.</li>
+        <li><strong>Review</strong> — where work you sent lands before it is closed.</li>
+        <li><strong>Flow</strong> — the pipeline view of where everything currently is.</li>
+      </ul>
+      <div class="slots three">
+        <div class="slot" data-slot="app-copybot" data-label="COPY BOT" data-why=""></div>
+        <div class="slot" data-slot="app-review" data-label="REVIEW" data-why=""></div>
+        <div class="slot" data-slot="app-flow" data-label="FLOW" data-why=""></div>
+      </div>
+    </div>
+  </details>
+</section>
+
+<!-- ============================= W: REFS ============================= -->
+<section class="page" id="p-w-refs">
+  <p class="eyebrow">WALKTHROUGH · WEIGHT 1</p>
+  <h1>Make reference images</h1>
+  <p class="lede">Slow work with permanent consequences. Do it once, properly.</p>
+
+  <ol class="steps">
+    <li><b>Decide the face</b>Real face, or an altered face she is comfortable with. If altered: build it, get it approved, then treat it as fixed. Never regenerate the face from scratch again.</li>
+    <li><b>Read the niche before you open anything</b>List every setting and experience the niche produces. That list is your shot list. A flight attendant has a uniform, a layover, an off-duty day. Cover all of it.</li>
+    <li><b>Take her real images into Nano Banana</b>Use what she actually sent. Put the right outfit for the niche and her personality onto her.</li>
+    <li><b>Edit for full face and full outfit</b>Face clear and unobstructed. Whole outfit visible. Full body in frame. Anything less is not a reference image.</li>
+    <li><b>Generate 5–6 minimum — then more</b>Always overproduce. You have two eyes and one opinion. The set you keep should be chosen from a set you rejected.</li>
+    <li><b>Get a second pair of eyes</b>Consistency errors are invisible to the person who made them. One or more people verify identity across the set before it goes in. This step is not optional on an altered face.</li>
+    <li><b>Pick the hero</b>One high-quality, consistent image becomes the face anchor used on nearly every generation, especially images. Everything else is variation: outfit, setting, expression.</li>
+    <li><b>Load them into Factory</b>Reference section, under the model name and the correct niche. They appear and are usable immediately.</li>
+  </ol>
+
+  <div class="callout hot">
+    <span class="k">ALTERED FACES</span>
+    <p>Inconsistency compounds fast. Every generation drifts a little from the last, and drifts stack. Always build from the locked hero, never from the last output.</p>
+  </div>
+
+</section>
+
+<!-- ============================= W: CAROUSEL ============================= -->
+<section class="page" id="p-w-carousel">
+  <p class="eyebrow">WALKTHROUGH · WEIGHT 1</p>
+  <h1>Make a carousel</h1>
+  <p class="lede">Batch work. Speed comes fast, but only after the source selection is right.</p>
+
+  <ol class="steps">
+    <li><b>Decide the output first</b>What day is she having? What is she doing? Write the prompt to fit that, not the other way round.</li>
+    <li><b>Find source images on Pinterest</b>Things she would plausibly post. Prioritise sources where the subject already resembles her and the setting already fits the niche. This one choice decides how hard the rest is.</li>
+    <li><b>Load the reference image, then the Pinterest image</b>Reference first, source second. Use the right prompt for the job:</li>
+  </ol>
+
+  <div class="prompt">
+    <div class="ph">HER FACE ONLY<button class="copy">COPY</button></div>
+<pre>put face of girl one onto face of girl 2
+
+maintain photo 2 photo quality and outfit or subject, keep it natural</pre>
+  </div>
+  <div class="prompt">
+    <div class="ph">HER FACE + HER OUTFIT<button class="copy">COPY</button></div>
+<pre>put subject identity of girl one onto subject identity of person 2
+
+maintain girl 1 outfit
+
+maintain photo 2 photo quality and setting
+
+*keep it natural*</pre>
+  </div>
+
+  <ol class="steps" start="4" style="counter-reset:s 3">
+    <li><b>Run the batch at 3 / 16</b>Best hit rate. Generate the batch, then pick.</li>
+    <li><b>Vary the wardrobe across the set</b>Mix the niche outfit with normal day-to-day clothes. Same outfit in every image reads as fake.</li>
+    <li><b>Select and group</b>Click <strong>Select</strong>, choose the images that belong to one post, group them.</li>
+    <li><b>Fill it with life</b>Use the <strong>Lifestyle</strong> tab to add her daily activity to the carousel — her room, her collectibles, her city, her friends. This is what makes it a life instead of a photoshoot.</li>
+    <li><b>Ready to post</b>Select the correct model and the correct niche. Check both. It goes to the Library where the scheduler picks it up.</li>
+  </ol>
+
+</section>
+
+<!-- ============================= W: FACTORY ============================= -->
+<section class="page" id="p-w-factory">
+  <p class="eyebrow">WALKTHROUGH · WEIGHT 2</p>
+  <h1>Factory videos from the prompt bank</h1>
+  <p class="lede">Two entry points. Pick based on whether the idea already exists.</p>
+
+  <h2>Route A — fresh idea, start at Scriptwriter</h2>
+  <ol class="steps">
+    <li><b>Open Scriptwriter</b>Tag the model with <code>@</code> — name and niche. It cannot write for a persona it does not know.</li>
+    <li><b>Talk it through in detail</b>Be specific about what you want. Vague in, vague out. Describe the shot, the action, the tone, the length.</li>
+    <li><b>Send to Factory</b>Select the correct reference images for the video, then generate.</li>
+    <li><b>Judge the render</b>It may be right first time. Often it is not.</li>
+    <li><b>Iterate properly</b>Copy the prompt, go back to the conversation where it was written, and explain the <strong>pros, the cons, and the specific change</strong> you want. Regenerate. Repeat until it is what you asked for — not until you are tired.</li>
+  </ol>
+
+  <h2>Route B — known format, start at the prompt bank</h2>
+  <ol class="steps">
+    <li><b>Pick the prompt</b>Prompt bank holds prompts that already produced results.</li>
+    <li><b>Add reference images</b>Correct model, correct niche.</li>
+    <li><b>Generate</b>The prompt comes attached — nothing else to write.</li>
+  </ol>
+
+  <h2>Route C — adapt a banked prompt to another niche</h2>
+  <ol class="steps">
+    <li><b>Copy the prompt from the bank</b></li>
+    <li><b>Go to Scriptwriter and tag the model it is for</b>Paste it in.</li>
+    <li><b>Describe the changes</b>Different niche, different lines, different setting. Scriptwriter rewrites it.</li>
+    <li><b>Send to Factory, pick references, generate</b>Same finish as Route A.</li>
+  </ol>
+
+</section>
+
+<!-- ============================= W: RECREATE ============================= -->
+<section class="page" id="p-w-recreate">
+  <p class="eyebrow">WALKTHROUGH · WEIGHT 2 · <span style="color:var(--warn)">MOST IMPORTANT</span></p>
+  <h1>Recreate a video from the Ideas tab</h1>
+  <p class="lede">Learn this one until it is automatic. It is half of everything you ship.</p>
+
+  <ol class="steps">
+    <li><b>Open Ideas and pick the model</b>Ideas are per model because niches and ICPs are per model. What works for one may be worthless for another.</li>
+    <li><b>Pick an idea and copy the link</b></li>
+    <li><b>Download the reference video</b>Use a safe downloader.</li>
+    <li><b>Load the reference video + the model's reference image</b>The image decides who she is. The video decides everything else.</li>
+    <li><b>Write the swap prompt</b>Start from the base below and change it to fit the video in front of you. Every video is different.</li>
+  </ol>
+
+  <div class="prompt">
+    <div class="ph">BASE SWAP PROMPT · EDIT PER VIDEO<button class="copy">COPY</button></div>
+<pre>Replace the woman in the video with the reference character.
+Preserve the exact body movement, facial performance, camera movement,
+framing, timing, environment and lighting.
+Change only the character.</pre>
+  </div>
+
+  <ol class="steps" start="6" style="counter-reset:s 5">
+    <li><b>Generate and check the swap</b>Movement, timing and identity must all survive. If any one of them breaks, the video is not usable — fix the prompt, not the edit.</li>
+    <li><b>Fix the audio in CapCut</b>Recreations usually come back with different sound. Stitch the new render over the original video so the original audio is kept. Or build new audio if the idea calls for it — your call.</li>
+    <li><b>Upload to the Library</b>Correct model, correct niche, Facebook and Instagram. It was made outside the Factory, so it will not appear on its own.</li>
+  </ol>
+
+  <div class="callout">
+    <span class="k">WHAT RECREATES AND WHAT DOESN'T</span>
+    <ul>
+      <li><strong>Recreates well:</strong> single subject, continuous shot, readable movement, clear framing.</li>
+      <li><strong>Fights you:</strong> many hard cuts, multiple people, extreme camera movement, heavy effects.</li>
+      <li>Around 8 in 10 niche-relevant virals are recreatable. Do not force the other 2 — rebuild them as a <a href="#builds">fresh video</a> instead.</li>
+    </ul>
+  </div>
+
+</section>
+
+<!-- ============================= W: CAPCUT ============================= -->
+<section class="page" id="p-w-capcut">
+  <p class="eyebrow">WALKTHROUGH · WEIGHT 3</p>
+  <h1>Fresh video in CapCut</h1>
+  <p class="lede">The broadest task here. The process depends entirely on the video you decided to make — so decide first.</p>
+
+  <ol class="steps">
+    <li><b>Define the finished video before you generate anything</b>What happens, in what order, for how long. Clip count falls out of this. Skipping this step is why a fresh video takes all day.</li>
+    <li><b>Generate every clip in the Factory</b>Same process as any Factory video — Scriptwriter or prompt bank, correct references, iterate until each clip is right.</li>
+    <li><b>Get every clip right before you edit</b>Editing does not rescue a bad clip. Regenerate it.</li>
+    <li><b>Build it in CapCut</b>Text, sound, filters, stacking, timing. This is where a video becomes a video.</li>
+    <li><b>Cut against hook / lead / CTA</b>Every second serves one of the three. If it serves none, delete it.</li>
+    <li><b>Upload to the Library</b>Model, niche, platforms. Built outside the Factory, so it will not appear on its own.</li>
+  </ol>
+
+  <div class="callout">
+    <span class="k">HOW YOU GET GOOD AT THIS</span>
+    <p>CapCut is a learn-by-doing skill. Nobody has ever read their way to it. Get your hands dirty, build badly, build again.</p>
+  </div>
+
+</section>
+
+<!-- ============================= TEST ============================= -->
+<section class="page" id="p-test">
+  <p class="eyebrow">PROVE IT</p>
+  <h1>The test</h1>
+  <p class="lede">Read nothing else until this is done. 15 videos, 15 images, using the reference images you were given.</p>
+
+  <h2>15 videos — five formats</h2>
+  <table>
+    <thead><tr><th>#</th><th>FORMAT</th><th>COUNT</th><th>PASS CONDITION</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">01</td><td>Recreated from Ideas</td><td class="mono">5</td><td>Movement, timing and identity all survive. Original audio kept.</td></tr>
+      <tr><td class="mono">02</td><td>Factory video from prompt bank</td><td class="mono">3</td><td>Correct references. Prompt used as intended.</td></tr>
+      <tr><td class="mono">03</td><td>Factory video from a fresh Scriptwriter prompt</td><td class="mono">3</td><td>Shows iteration — first render and final render both kept.</td></tr>
+      <tr><td class="mono">04</td><td>Editor-only talking video</td><td class="mono">2</td><td>Captions, music, trimmed. Personality readable.</td></tr>
+      <tr><td class="mono">05</td><td>Fresh video in CapCut</td><td class="mono">2</td><td>Multi-clip. Hook, lead and CTA all identifiable.</td></tr>
+    </tbody>
+  </table>
+  <p class="small">Across all 15: a <strong>50 / 50 split of recreated and fresh</strong>, and around <strong>2 variations of every type</strong>.</p>
+
+  <h2>15 images</h2>
+  <ul>
+    <li><strong>5</strong> — reference images for a given model and niche. Clear face, full body, consistent, varied.</li>
+    <li><strong>6</strong> — lifestyle posts. She is doing something, it tells a story, it leads somewhere.</li>
+    <li><strong>4</strong> — one grouped carousel, filled out with the Lifestyle tab.</li>
+  </ul>
+
+  <h2>How it is marked</h2>
+  <table>
+    <thead><tr><th>MARKED ON</th><th>FAIL LOOKS LIKE</th></tr></thead>
+    <tbody>
+      <tr><td>Identity consistency</td><td>Two videos, two different faces.</td></tr>
+      <tr><td>Niche fit</td><td>Content that could belong to any account.</td></tr>
+      <tr><td>Hook / lead / CTA</td><td>Dead seconds. No reason to watch or to act.</td></tr>
+      <tr><td>Correct filing</td><td>Wrong model or wrong niche on upload.</td></tr>
+      <tr><td>Volume discipline</td><td>One version of everything. No variations.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Submissions</h2>
+  <div class="slots three">
+    <div class="slot" data-slot="test-vid-recreated" data-label="RECREATED ×5" data-why=""></div>
+    <div class="slot" data-slot="test-vid-bank" data-label="PROMPT BANK ×3" data-why=""></div>
+    <div class="slot" data-slot="test-vid-fresh" data-label="SCRIPTWRITER ×3" data-why=""></div>
+    <div class="slot" data-slot="test-vid-editor" data-label="EDITOR ×2" data-why=""></div>
+    <div class="slot" data-slot="test-vid-build" data-label="CAPCUT BUILD ×2" data-why=""></div>
+    <div class="slot" data-slot="test-img-ref" data-label="REFERENCES ×5" data-why=""></div>
+    <div class="slot" data-slot="test-img-post" data-label="POSTS ×6" data-why=""></div>
+    <div class="slot" data-slot="test-img-car" data-label="CAROUSEL ×4" data-why=""></div>
+  </div>
+</section>
+
+<!-- ============================= THE BAR ============================= -->
+<section class="page" id="p-bar">
+  <p class="eyebrow">PROVE IT</p>
+  <h1>Week one &amp; the bar</h1>
+  <p class="lede">Week one is paid learning time. After that you are measured on output, and the numbers are not soft.</p>
+
+  <h2>The daily bar</h2>
+  <div class="grid2">
+    <div class="card" style="border-color:#3b2d70">
+      <div style="font-size:44px; line-height:1; font-weight:650; letter-spacing:-.03em">40</div>
+      <div style="font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--accent); margin:6px 0 10px">SUCCESSFUL VIDEOS / DAY</div>
+      <p class="small"><strong>Successful</strong> is the operative word. A render that gets rejected in review did not happen. 40 shipped, not 40 attempted.</p>
+    </div>
+    <div class="card" style="border-color:#3b2d70">
+      <div style="font-size:44px; line-height:1; font-weight:650; letter-spacing:-.03em">20</div>
+      <div style="font-family:var(--mono); font-size:10px; letter-spacing:.16em; color:var(--accent); margin:6px 0 10px">CAROUSEL IMAGES / DAY</div>
+      <p class="small">Grouped, filled with Lifestyle, filed under the correct model and niche. Loose images sitting in a batch are not output.</p>
+    </div>
+  </div>
+
+  <h2>What the numbers actually require</h2>
+  <ul>
+    <li><strong>40 videos = 20 recreated + 20 fresh.</strong> That is the 50/50 split at volume. You do not hit 40 by building 40 from scratch — you hit it by being fast at recreation, which pays for the time the fresh half costs you.</li>
+    <li><strong>Batch, don't drip.</strong> Queue generations, work on edits while they run. Waiting on a render with nothing else open is where the day is lost.</li>
+    <li><strong>Reject faster.</strong> A bad render is a sunk cost after ten seconds of looking at it. Regenerate and move.</li>
+    <li><strong>Pull targets in bulk.</strong> One Spy and Ideas session at the start of the day beats hunting for a reference video 28 separate times.</li>
+    <li><strong>File as you go.</strong> Uploading 40 videos to the Library at 11pm is how model and niche get set wrong.</li>
+  </ul>
+
+  <h2>What you can do by the end of week one</h2>
+  <div class="rule good">
+    <h3>Make high quality videos</h3>
+    <p>They represent the niche and read as a real life the model is actually living — not clips of a character.</p>
+  </div>
+  <div class="rule good">
+    <h3>Make high quality pictures</h3>
+    <p>They reflect the character and the avatar. Someone who has never seen the account can describe her from the grid.</p>
+  </div>
+  <div class="rule good">
+    <h3>Ideate</h3>
+    <p>You come up with new concepts and directions without being handed them. You add to the Ideas tab instead of only taking from it.</p>
+  </div>
+  <div class="rule good">
+    <h3>Spot value</h3>
+    <p>You identify high value concepts and production opportunities on your own — you can look at a viral and immediately say whether it is recreatable, for which model, and why.</p>
+  </div>
+
+  <h2>Week one, day by day</h2>
+  <table>
+    <thead><tr><th>DAY</th><th>FOCUS</th><th>OUT</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">01</td><td>Read this document end to end. Reference images and the app.</td><td class="small">Reference set for one model</td></tr>
+      <tr><td class="mono">02</td><td>Images. Carousels, sourcing, the Lifestyle tab, filing.</td><td class="small">15 test images</td></tr>
+      <tr><td class="mono">03</td><td>Recreation. Ideas tab, swap prompt, CapCut audio stitch.</td><td class="small">5 recreations</td></tr>
+      <tr><td class="mono">04</td><td>Factory. Prompt bank, Scriptwriter, iteration, Editor.</td><td class="small">8 factory videos</td></tr>
+      <tr><td class="mono">05</td><td>Fresh videos. Plan, generate clips, assemble in CapCut.</td><td class="small">2 fresh videos</td></tr>
+      <tr><td class="mono">06–07</td><td>Volume. Everything together, no hand-holding.</td><td class="small">Working toward 40 / 20</td></tr>
+    </tbody>
+  </table>
+  <p class="small">The <a href="#test">test</a> is what days 2–5 produce. Nothing here is separate work.</p>
+
+  <div class="callout">
+    <span class="k">HOW THIS IS JUDGED</span>
+    <p>Volume without quality is worthless and quality without volume is a hobby. The bar is both. If you are hitting 40 and half get sent back, you are at 20, and half the day produced nothing.</p>
+  </div>
+
+</section>
+
+<!-- ============================= INDEX ============================= -->
+<section class="page" id="p-index">
+  <p class="eyebrow">MAINTENANCE</p>
+  <h1>Media slot index</h1>
+  <p class="lede">Every example slot in this document. Fill them by pasting a link into the slot, or hand this list to Claude with the links and it will fill them in.</p>
+
+  <div class="callout">
+    <span class="k">HOW TO FILL A SLOT</span>
+    <ul>
+      <li>Click a slot → paste an image link, a video link, or a page link → Enter.</li>
+      <li>Or drag an image or video file straight onto it.</li>
+      <li><strong>Export</strong> gives you JSON of every filled slot. <strong>Import</strong> puts it back.</li>
+      <li>To make it permanent, send the exported JSON to Claude and ask it to bake the links into the file.</li>
+    </ul>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:24px"></th><th class="mono">SLOT ID</th><th>PAGE</th><th>LABEL</th><th>CURRENT</th></tr></thead>
+    <tbody id="slotIndex"></tbody>
+  </table>
+</section>
+
+  <div id="pager" style="display:flex; gap:10px; align-items:center; margin:56px 0 0; padding-top:18px; border-top:1px solid var(--line)">
+    <button class="btn" id="prevBtn">← PREVIOUS</button>
+    <span class="counter" id="pagePos"></span>
+    <div class="spacer"></div>
+    <button class="btn pri" id="nextBtn">NEXT →</button>
+  </div>
+
+  </div>
+</div>
+</div>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast"></div>
+<script type="application/json" id="seed">{}</script>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- pages ---------------- */
+var PAGES = {
+  "start":"READ THIS FIRST","anatomy":"ANATOMY OF A VIDEO","types":"THE FOUR CONTENT TYPES",
+  "refs":"REFERENCE IMAGES","posts":"POSTS & CAROUSELS","recreated":"RECREATED VIDEOS",
+  "builds":"FRESH VIDEOS / CAPCUT VIDEOS","basics":"BASICS — WHAT MATTERS NOW","rest":"EVERYTHING ELSE",
+  "w-refs":"MAKE REFERENCE IMAGES","w-carousel":"MAKE A CAROUSEL","w-factory":"FACTORY FROM PROMPT BANK",
+  "w-recreate":"RECREATE FROM IDEAS","w-capcut":"FRESH VIDEO IN CAPCUT",
+  "test":"THE TEST","bar":"WEEK ONE & THE BAR","index":"MEDIA SLOT INDEX"
+};
+
+/* Admin view (?admin=1) shows unfilled slots, the counter and the slot index.
+   Everyone else sees only what has actually been filled in. */
+var ADMIN = /[?&]admin=1/.test(location.search);
+if(ADMIN) document.body.classList.add("admin");
+if(!ADMIN) delete PAGES["index"];
+
+var ORDER = Object.keys(PAGES), CURRENT = "start";
+
+function go(id){
+  if(!PAGES[id]) id="start";
+  var pages=document.querySelectorAll(".page");
+  for(var i=0;i<pages.length;i++) pages[i].classList.toggle("on", pages[i].id==="p-"+id);
+  var navs=document.querySelectorAll(".side a.nav");
+  for(var j=0;j<navs.length;j++) navs[j].classList.toggle("on", navs[j].getAttribute("href")==="#"+id);
+  document.getElementById("crumb").textContent="/ "+PAGES[id];
+  CURRENT=id; paintPager();
+  try{ window.scrollTo(0,0); }catch(e){}
+  document.documentElement.scrollTop=0; document.body.scrollTop=0;
+  if(id==="index") buildIndex();
+}
+/* Intercept in-page links rather than touching location.hash — a sandboxed
+   preview treats hash navigation as a top-level page change. */
+document.addEventListener("click",function(e){
+  var a=e.target.closest && e.target.closest('a[href^="#"]');
+  if(!a) return;
+  e.preventDefault(); e.stopPropagation();
+  go(a.getAttribute("href").slice(1));
+},true);
+
+function paintPager(){
+  var i=ORDER.indexOf(CURRENT);
+  var prev=document.getElementById("prevBtn"), next=document.getElementById("nextBtn");
+  prev.disabled = i<=0; next.disabled = i>=ORDER.length-1;
+  prev.style.opacity = prev.disabled ? .35 : 1;
+  next.style.opacity = next.disabled ? .35 : 1;
+  document.getElementById("pagePos").textContent=(i+1)+" of "+ORDER.length;
+}
+document.getElementById("prevBtn").addEventListener("click",function(){
+  var i=ORDER.indexOf(CURRENT); if(i>0) go(ORDER[i-1]);
+});
+document.getElementById("nextBtn").addEventListener("click",function(){
+  var i=ORDER.indexOf(CURRENT); if(i<ORDER.length-1) go(ORDER[i+1]);
+});
+
+/* ---------------- media data ----------------
+   Each entry is either "url" or
+   { src:"file-or-url", link:"where it came from", note:"why it is here", tall:true }
+   src is what plays on the page. link is printed underneath it.            */
+var MEDIA = {};
+(function(){
+  var seed=document.getElementById("seed");
+  if(!seed) return;
+  try{
+    var s=JSON.parse(seed.textContent||"{}");
+    Object.keys(s).forEach(function(k){
+      var v=s[k];
+      if(typeof v==="string") v={src:v};
+      if(v && typeof v==="object" && (v.src||v.link)) MEDIA[k]=v;
+    });
+  }catch(e){}
+})();
+
+/* ---------------- rendering ---------------- */
+var IMG=/\.(png|jpe?g|gif|webp|avif|bmp|svg)(\?|$)/i;
+var VID=/\.(mp4|webm|mov|m4v|ogv)(\?|$)/i;
+
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+function domainOf(url){
+  try{ return new URL(url, location.href).hostname.replace(/^www\./,""); }
+  catch(e){ return url; }
+}
+function kindOf(src){
+  if(!src) return "none";
+  if(src.indexOf("data:video")===0 || VID.test(src)) return "video";
+  if(src.indexOf("data:image")===0 || IMG.test(src)) return "image";
+  if(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)/.test(src)) return "youtube";
+  return "link";
+}
+function mediaHtml(entry){
+  var src=entry.src, k=kindOf(src), cls="media"+(entry.tall?" tall":"");
+  if(k==="video")
+    return '<div class="'+cls+'"><video controls playsinline preload="metadata" src="'+esc(src)+'"></video></div>';
+  if(k==="image")
+    return '<div class="'+cls+'"><img loading="lazy" src="'+esc(src)+'" alt=""><span class="zoom">EXPAND</span></div>';
+  if(k==="youtube"){
+    var m=src.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]{6,})/);
+    return '<div class="'+cls+'"><iframe src="https://www.youtube.com/embed/'+m[1]+'" allowfullscreen loading="lazy"></iframe></div>';
+  }
+  return "";
+}
+function srcHtml(entry){
+  var link=entry.link||(kindOf(entry.src)==="link"?entry.src:"");
+  if(!link) return "";
+  return '<div class="src"><span class="k">SOURCE</span>'+
+         '<a href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">'+esc(domainOf(link))+' &#8599;</a></div>';
+}
+
+function paint(slot){
+  var id=slot.dataset.slot, label=slot.dataset.label||"EXAMPLE", why=slot.dataset.why||"";
+  var entry=MEDIA[id];
+  var head='<div class="shead"><span class="lbl">'+esc(label)+'</span>'+
+           (ADMIN?'<span class="sid">'+esc(id)+'</span>':'')+'</div>';
+
+  if(entry){
+    slot.classList.add("filled");
+    slot.style.display="";
+    slot.innerHTML = head + mediaHtml(entry) + srcHtml(entry) +
+      ((entry.note||why) ? '<div class="note">'+esc(entry.note||why)+'</div>' : "") +
+      '<div style="height:10px"></div>';
+    var med=slot.querySelector(".media");
+    if(med && kindOf(entry.src)==="image")
+      med.addEventListener("click",function(){ openLightbox(entry,label); });
+    return;
+  }
+
+  /* Unfilled: invisible to readers, visible to us with ?admin=1 */
+  slot.classList.remove("filled");
+  if(!ADMIN){ slot.style.display="none"; slot.innerHTML=""; return; }
+  slot.style.display="";
+  slot.innerHTML = head +
+    '<div class="sbody"><span class="ghost"></span>'+
+    '<span class="small" style="font-size:10.5px;color:var(--faint)">not filled yet</span></div>'+
+    (why?'<div class="why">'+esc(why)+'</div>':"");
+}
+
+/* Collapse a group once every slot inside it is hidden, then hide any
+   heading that exists only to introduce groups which are now all hidden. */
+function tidy(){
+  [].slice.call(document.querySelectorAll(".slots")).forEach(function(g){
+    var any=[].slice.call(g.children).some(function(c){ return c.style.display!=="none"; });
+    g.style.display = any ? "" : "none";
+  });
+
+  function isGroup(el){ return el && el.classList && el.classList.contains("slots"); }
+  function isCaption(el){ return el && el.tagName==="P" && el.classList.contains("small"); }
+
+  [].slice.call(document.querySelectorAll(".page h2, .page h3")).forEach(function(h){
+    var n=h.nextElementSibling, sawGroup=false, anyVisible=false;
+    while(n && (isGroup(n) || isCaption(n))){
+      if(isGroup(n)){
+        sawGroup=true;
+        if(n.style.display!=="none") anyVisible=true;
+      }
+      n=n.nextElementSibling;
+    }
+    if(!sawGroup || anyVisible) return;
+    h.style.display="none";
+    var m=h.nextElementSibling;
+    while(m && (isGroup(m) || isCaption(m))){ m.style.display="none"; m=m.nextElementSibling; }
+  });
+}
+
+var SLOTS=[];
+function initSlots(){
+  SLOTS=[].slice.call(document.querySelectorAll(".slot"));
+  SLOTS.forEach(paint);
+  tidy();
+  var filled=SLOTS.filter(function(s){ return MEDIA[s.dataset.slot]; }).length;
+  var fEl=document.getElementById("filled"), tEl2=document.getElementById("total");
+  if(fEl) fEl.textContent=filled;
+  if(tEl2) tEl2.textContent=SLOTS.length;
+}
+
+/* ---------------- lightbox ---------------- */
+var lb=document.getElementById("lb");
+function openLightbox(entry,label){
+  var link=entry.link||"";
+  lb.innerHTML='<button class="lbclose" aria-label="Close">&times;</button>'+
+    '<img src="'+esc(entry.src)+'" alt="">'+
+    '<div class="lbbar"><span>'+esc(label)+'</span>'+
+    (link?'<a href="'+esc(link)+'" target="_blank" rel="noopener noreferrer">'+esc(domainOf(link))+' &#8599;</a>':"")+
+    '</div>';
+  lb.classList.add("on");
+  lb.querySelector(".lbclose").addEventListener("click",closeLightbox);
+}
+function closeLightbox(){ lb.classList.remove("on"); lb.innerHTML=""; }
+lb.addEventListener("click",function(e){ if(e.target===lb) closeLightbox(); });
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeLightbox(); });
+
+/* ---------------- slot index (admin) ---------------- */
+function buildIndex(){
+  var tb=document.getElementById("slotIndex"); if(!tb) return;
+  tb.innerHTML="";
+  SLOTS.forEach(function(s){
+    var page=s.closest(".page"), pid=page?page.id.replace("p-",""):"";
+    var e=MEDIA[s.dataset.slot];
+    var tr=document.createElement("tr");
+    tr.innerHTML='<td><span class="dot'+(e?" f":"")+'"></span></td>'+
+      '<td class="mono">'+esc(s.dataset.slot)+'</td>'+
+      '<td class="small">'+esc(PAGES[pid]||pid)+'</td>'+
+      '<td class="small">'+esc(s.dataset.label||"")+'</td>'+
+      '<td class="mono small" style="word-break:break-all;color:var(--faint)">'+
+        (e ? esc(String(e.src||e.link).slice(0,64)) : "—")+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+/* ---------------- copy buttons ---------------- */
+[].slice.call(document.querySelectorAll(".prompt .copy")).forEach(function(b){
+  b.addEventListener("click",function(){
+    var pre=b.closest(".prompt").querySelector("pre");
+    var txt=pre.textContent;
+    function done(){ toast("Prompt copied"); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done,fallback);
+    } else fallback();
+    function fallback(){
+      var r=document.createRange(); r.selectNodeContents(pre);
+      var sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      try{ document.execCommand("copy"); done(); }catch(e){ toast("Select and copy manually"); }
+      sel.removeAllRanges();
+    }
+  });
+});
+
+/* ---------------- toast ---------------- */
+var tEl=document.getElementById("toast"), tTimer;
+function toast(msg){
+  tEl.textContent=msg; tEl.classList.add("on");
+  clearTimeout(tTimer); tTimer=setTimeout(function(){ tEl.classList.remove("on"); },1900);
+}
+
+/* ---------------- boot ---------------- */
+initSlots();
+go("start");
+})();
+</script>
+</body>
+</html>
