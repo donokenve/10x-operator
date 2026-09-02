@@ -293,6 +293,11 @@ body.admin a.nav.admin-only{display:flex !important}
   .slot .media img,.slot .media video{max-height:70vh}
 }
 
+/* video slots: the frame is the affordance — no player chrome until it plays */
+.slot .media.vid{cursor:pointer}
+.slot .media.vid video{cursor:pointer}
+.slot .media.vid video[controls]{cursor:default}
+
 </style>
 </head>
 <body>
@@ -1256,14 +1261,17 @@ Change only the character.</pre>
 <script type="application/json" id="seed">{
  "build-top-1": {
   "src": "media/build-top-1.mp4",
+  "poster": "media/build-top-1-poster.jpg",
   "tall": true
  },
  "build-top-2": {
   "src": "media/build-top-2.mp4",
+  "poster": "media/build-top-2-poster.jpg",
   "tall": true
  },
  "build-top-3": {
   "src": "media/build-top-3.mp4",
+  "poster": "media/build-top-3-poster.jpg",
   "tall": true
  },
  "post-feed-1": {
@@ -1280,14 +1288,17 @@ Change only the character.</pre>
  },
  "rec-top-1": {
   "src": "media/rec-top-1.mp4",
+  "poster": "media/rec-top-1-poster.jpg",
   "tall": true
  },
  "rec-top-2": {
   "src": "media/rec-top-2.mp4",
+  "poster": "media/rec-top-2-poster.jpg",
   "tall": true
  },
  "rec-top-3": {
   "src": "media/rec-top-3.mp4",
+  "poster": "media/rec-top-3-poster.jpg",
   "tall": true
  },
  "ref-set-1": {
@@ -1405,7 +1416,9 @@ function kindOf(src){
 function mediaHtml(entry){
   var src=entry.src, k=kindOf(src), cls="media"+(entry.tall?" tall":"");
   if(k==="video")
-    return '<div class="'+cls+'"><video controls playsinline preload="metadata" src="'+esc(src)+'"></video></div>';
+    return '<div class="'+cls+' vid"><video playsinline preload="none"'+
+           (entry.poster?' poster="'+esc(entry.poster)+'"':"")+
+           ' src="'+esc(src)+'"></video></div>';
   if(k==="image")
     return '<div class="'+cls+'"><img loading="lazy" src="'+esc(src)+'" alt=""><span class="zoom">EXPAND</span></div>';
   if(k==="youtube"){
@@ -1434,8 +1447,20 @@ function paint(slot){
       ((entry.note||why) ? '<div class="note">'+esc(entry.note||why)+'</div>' : "") +
       '<div style="height:10px"></div>';
     var med=slot.querySelector(".media");
-    if(med && kindOf(entry.src)==="image")
+    var kind=kindOf(entry.src);
+    if(med && kind==="image")
       med.addEventListener("click",function(){ openLightbox(entry,label); });
+    if(med && kind==="video"){
+      /* No chrome until it is running: the frame is the invitation, one
+         click starts it, and the native controls take over from there. */
+      var v=med.querySelector("video");
+      med.addEventListener("click",function(){
+        if(v.controls) return;
+        v.controls=true;
+        var pr=v.play();
+        if(pr && pr.catch) pr.catch(function(){ v.controls=true; });
+      });
+    }
     return;
   }
 
