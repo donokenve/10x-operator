@@ -328,8 +328,8 @@ body.admin a.nav.admin-only{display:flex !important}
 
   <div class="navgroup">THE APP</div>
   <a class="nav" href="#basics-line">The Line<span class="tag">1</span></a>
-  <a class="nav" href="#basics-script">Scripting<span class="tag">2</span></a>
-  <a class="nav" href="#basics-factory">Factory<span class="tag">3</span></a>
+  <a class="nav" href="#basics-factory">Factory<span class="tag">2</span></a>
+  <a class="nav" href="#basics-script">Scripting<span class="tag">3</span></a>
   <a class="nav" href="#basics-pictures">Pictures &mdash; Nano Banana<span class="tag">4</span></a>
   <a class="nav" href="#basics-editor">Editor<span class="tag">5</span></a>
   <a class="nav" href="#basics-library">Library<span class="tag">6</span></a>
@@ -810,38 +810,52 @@ maintain photo 2 photo quality and setting
   </div>
 </section>
 
-<!-- ===================== THE APP: Scripting ===================== -->
-<section class="page" id="p-basics-script">
+<!-- ===================== THE APP: Factory ===================== -->
+<section class="page" id="p-basics-factory">
   <p class="eyebrow">THE APP &middot; 2 OF 6</p>
-  <h1>Scripting</h1>
+  <h1>Factory</h1>
 
-  <ul>
-    <li><strong>Prompt bank</strong> — prompts that already produced good videos. Copy, adapt, reuse.</li>
-    <li><strong>Scriptwriter</strong> — where new prompts are written. Tag the model with <code>@</code> so it knows the niche.</li>
-    <li><strong>Showcase</strong> — what good looks like.</li>
-    <li><strong>Ideas</strong> — a constantly refreshed list of videos to recreate, per model. You can add ideas yourself. Add them.</li>
-  </ul>
+  <h3>Where every render is created</h3>
+  <p>Where the video models live and where every render is made.</p>
   <div class="slots screen">
-    <div class="slot" data-slot="app-script-1" data-label="SCRIPTING MENU" data-why="Prompt bank, Scriptwriter, Showcase, Ideas"></div>
-    <div class="slot" data-slot="app-script-2" data-label="SCRIPTWRITER" data-why="Tagging a model and briefing it"></div>
-    <div class="slot" data-slot="app-script-3" data-label="IDEAS TAB" data-why="Fresh recreation targets per model"></div>
+    <div class="slot" data-slot="app-factory-1" data-label="FACTORY &mdash; GENERATE" data-why="Creator, niche, references, prompt, engine, duration, ratio, cost"></div>
+  </div>
+  <h3>Every past video is here</h3>
+  <p>The first render of something that later gets millions of views starts on this page.</p>
+  <div class="slots screen">
+    <div class="slot" data-slot="app-factory-2" data-label="FACTORY &mdash; FEED" data-why="What comes back, and every action you can take on it"></div>
+  </div>
+  <h3>Ready to edit</h3>
+  <p>Send a finished render onward with <strong>Ready to edit</strong> to reach the Editor.</p>
+  <div class="slots screen">
+    <div class="slot" data-slot="app-factory-3" data-label="READY TO EDIT" data-why="Sending a render onward"></div>
   </div>
 </section>
 
-<!-- ===================== THE APP: Factory ===================== -->
-<section class="page" id="p-basics-factory">
+<!-- ===================== THE APP: Scripting ===================== -->
+<section class="page" id="p-basics-script">
   <p class="eyebrow">THE APP &middot; 3 OF 6</p>
-  <h1>Factory</h1>
+  <h1>Scripting</h1>
 
-  <ul>
-    <li>Where the video models live and where every render is created.</li>
-    <li>Every past video is here. The first render of something that later gets millions of views starts on this page.</li>
-    <li>Send a finished render onward with <strong>Ready to edit</strong> to reach the Editor.</li>
-  </ul>
+  <h3>Prompt bank</h3>
+  <p>Prompts that already produced good videos. Copy, adapt, reuse.</p>
   <div class="slots screen">
-    <div class="slot" data-slot="app-factory-1" data-label="FACTORY — GENERATE" data-why="Model, niche, references, prompt"></div>
-    <div class="slot" data-slot="app-factory-2" data-label="FACTORY — FEED" data-why="Renders and what to do with them"></div>
-    <div class="slot" data-slot="app-factory-3" data-label="READY TO EDIT" data-why="Sending a render onward"></div>
+    <div class="slot" data-slot="app-script-bank" data-label="PROMPT BANK" data-why="A banked prompt opened up: the full script, what it won for, what it was used for"></div>
+  </div>
+  <h3>Scriptwriter</h3>
+  <p>Where new prompts are written. Tag the model with <code>@</code> so it knows the niche.</p>
+  <div class="slots screen">
+    <div class="slot" data-slot="app-script-2" data-label="SCRIPTWRITER" data-why="A finished script: camera and motion, delivery, a timed beat sheet, and the locks"></div>
+  </div>
+  <h3>Showcase</h3>
+  <p>What good looks like.</p>
+  <div class="slots screen">
+    <div class="slot" data-slot="app-script-4" data-label="SHOWCASE" data-why="Finished videos kept as the reference for how a good one is made"></div>
+  </div>
+  <h3>Ideas</h3>
+  <p>A constantly refreshed list of videos to recreate, per model. You can add ideas yourself. Add them.</p>
+  <div class="slots screen">
+    <div class="slot" data-slot="app-script-3" data-label="IDEAS" data-why="Recreation targets per creator, with who is already on each one"></div>
   </div>
 </section>
 
@@ -1334,14 +1348,17 @@ Change only the character.</pre>
  "app-review": {
   "src": "media/app-review.jpg"
  },
- "app-script-1": {
-  "src": "media/app-script-1.jpg"
- },
  "app-script-2": {
   "src": "media/app-script-2.jpg"
  },
  "app-script-3": {
   "src": "media/app-script-3.jpg"
+ },
+ "app-script-4": {
+  "src": "media/app-script-4.jpg"
+ },
+ "app-script-bank": {
+  "src": "media/app-script-bank.jpg"
  },
  "app-spy-1": {
   "src": "media/app-spy-1.jpg"
@@ -1434,7 +1451,7 @@ Change only the character.</pre>
 var PAGES = {
   "start":"READ THIS FIRST","anatomy":"ANATOMY OF A VIDEO","types":"THE FOUR CONTENT TYPES",
   "refs":"REFERENCE IMAGES","posts":"POSTS & CAROUSELS","recreated":"RECREATED VIDEOS",
-  "builds":"FRESH VIDEOS / CAPCUT VIDEOS","basics-line":"THE APP — THE LINE","basics-script":"THE APP — SCRIPTING","basics-factory":"THE APP — FACTORY","basics-pictures":"THE APP — PICTURES — NANO BANANA","basics-editor":"THE APP — EDITOR","basics-library":"THE APP — LIBRARY","rest":"EVERYTHING ELSE",
+  "builds":"FRESH VIDEOS / CAPCUT VIDEOS","basics-line":"THE APP — THE LINE","basics-factory":"THE APP — FACTORY","basics-script":"THE APP — SCRIPTING","basics-pictures":"THE APP — PICTURES — NANO BANANA","basics-editor":"THE APP — EDITOR","basics-library":"THE APP — LIBRARY","rest":"EVERYTHING ELSE",
   "w-refs":"MAKE REFERENCE IMAGES","w-carousel":"MAKE A CAROUSEL","w-factory":"FACTORY FROM PROMPT BANK",
   "w-recreate":"RECREATE FROM IDEAS","w-capcut":"FRESH VIDEO IN CAPCUT",
   "test":"THE TEST","bar":"WEEK ONE & THE BAR","index":"MEDIA SLOT INDEX"
