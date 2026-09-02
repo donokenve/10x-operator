@@ -297,6 +297,16 @@ body.admin a.nav.admin-only{display:flex !important}
 .slot .media.vid{cursor:pointer}
 .slot .media.vid video{cursor:pointer}
 .slot .media.vid video[controls]{cursor:default}
+
+/* ---- app screens: shown at reading size, one per row ---- */
+.wrap{max-width:1140px}
+.slots.screen{grid-template-columns:1fr; gap:20px}
+.slots.screen .slot{border-style:solid; border-color:var(--line2)}
+.slots.screen .slot .media img,
+.slots.screen .slot .media video{max-height:none; width:100%; object-fit:contain}
+.slots.screen .slot .shead{padding:9px 12px; font-size:10px}
+.slots.screen .slot .note{font-size:13.5px; padding:11px 12px 0}
+@media(max-width:820px){.slots.screen{gap:14px}}
 </style>
 </head>
 <body>
@@ -317,7 +327,12 @@ body.admin a.nav.admin-only{display:flex !important}
   <a class="nav" href="#builds">Fresh videos<span class="tag">04</span></a>
 
   <div class="navgroup">THE APP</div>
-  <a class="nav" href="#basics">Basics — what matters now</a>
+  <a class="nav" href="#basics-line">The Line<span class="tag">1</span></a>
+  <a class="nav" href="#basics-script">Scripting<span class="tag">2</span></a>
+  <a class="nav" href="#basics-factory">Factory<span class="tag">3</span></a>
+  <a class="nav" href="#basics-pictures">Pictures &mdash; Nano Banana<span class="tag">4</span></a>
+  <a class="nav" href="#basics-editor">Editor<span class="tag">5</span></a>
+  <a class="nav" href="#basics-library">Library<span class="tag">6</span></a>
   <a class="nav" href="#rest">Everything else</a>
 
   <div class="navgroup">DO THE WORK</div>
@@ -388,7 +403,7 @@ body.admin a.nav.admin-only{display:flex !important}
 
   <h2>How your day is built</h2>
   <p>Tasks land in <strong>The Line</strong>. Each one has a weight. A full day is a selection of them, split by importance.</p>
-  <div class="slots">
+  <div class="slots screen">
     <div class="slot wide" data-slot="line-weights" data-label="TASK WEIGHTS" data-why="The task list and what each one is worth"></div>
   </div>
   <p class="small">A task might be “make 40 videos for Kira today” — how you get there is yours. It might be “recreate these exact five, one to one” — then it is exactly those five. Quality is on you.</p>
@@ -733,12 +748,12 @@ maintain photo 2 photo quality and setting
   <p>One clip or many. The number of clips is a consequence of the idea, never the starting point.</p>
 
   <h2>The pieces</h2>
-  <div class="slots three">
+  <div class="slots screen">
     <div class="slot" data-slot="tool-scriptwriter" data-label="SCRIPTWRITER" data-why="Writes new prompts, or rewrites an existing one to hit a different idea"></div>
     <div class="slot" data-slot="tool-ideas" data-label="IDEAS TAB" data-why="Where you go when a video can't be recreated, or you want to change it"></div>
     <div class="slot" data-slot="tool-promptbank" data-label="PROMPT BANK" data-why="Prompts that already worked. Start here when the format is known"></div>
   </div>
-  <div class="slots three">
+  <div class="slots screen">
     <div class="slot" data-slot="tool-factory" data-label="FACTORY" data-why="Generates every clip"></div>
     <div class="slot" data-slot="tool-editor" data-label="EDITOR" data-why="Finishes simple videos. Music, captions, trims. Enhance only"></div>
     <div class="slot" data-slot="tool-capcut" data-label="CAPCUT" data-why="Builds videos that don't exist yet. Text, sound, filters, stacking"></div>
@@ -775,12 +790,11 @@ maintain photo 2 photo quality and setting
 </section>
 
 <!-- ============================= BASICS ============================= -->
-<section class="page" id="p-basics">
-  <p class="eyebrow">THE APP</p>
-  <h1>Basics — what matters now</h1>
-  <p class="lede">Six places. You will live in these every day. Everything else can wait until you need it.</p>
+<!-- ===================== THE APP: The Line ===================== -->
+<section class="page" id="p-basics-line">
+  <p class="eyebrow">THE APP &middot; 1 OF 6</p>
+  <h1>The Line</h1>
 
-  <h2>The Line</h2>
   <ul>
     <li>Every daily and weekly task, with the material and the information needed to complete it.</li>
     <li>Your responsibilities in one place. If it is not in The Line it is not your job today.</li>
@@ -789,47 +803,59 @@ maintain photo 2 photo quality and setting
     <li>Complete a task: tick every step → attach files if required → <strong>Send for review</strong>. It is then marked and closed off.</li>
     <li>Review and Flow sit alongside it. Overdue is visible to everyone.</li>
   </ul>
-  <div class="slots three">
+  <div class="slots screen">
     <div class="slot" data-slot="app-line-1" data-label="THE LINE — LIST" data-why="Open, late, closed"></div>
     <div class="slot" data-slot="app-line-2" data-label="A TASK OPEN" data-why="Steps, attachments, send for review"></div>
     <div class="slot" data-slot="app-line-3" data-label="SENT FOR REVIEW" data-why="What a completed task looks like"></div>
   </div>
+</section>
 
+<!-- ===================== THE APP: Scripting ===================== -->
+<section class="page" id="p-basics-script">
+  <p class="eyebrow">THE APP &middot; 2 OF 6</p>
+  <h1>Scripting</h1>
 
-  <h2>Scripting</h2>
   <ul>
     <li><strong>Prompt bank</strong> — prompts that already produced good videos. Copy, adapt, reuse.</li>
     <li><strong>Scriptwriter</strong> — where new prompts are written. Tag the model with <code>@</code> so it knows the niche.</li>
     <li><strong>Showcase</strong> — what good looks like.</li>
     <li><strong>Ideas</strong> — a constantly refreshed list of videos to recreate, per model. You can add ideas yourself. Add them.</li>
   </ul>
-  <div class="slots three">
+  <div class="slots screen">
     <div class="slot" data-slot="app-script-1" data-label="SCRIPTING MENU" data-why="Prompt bank, Scriptwriter, Showcase, Ideas"></div>
     <div class="slot" data-slot="app-script-2" data-label="SCRIPTWRITER" data-why="Tagging a model and briefing it"></div>
     <div class="slot" data-slot="app-script-3" data-label="IDEAS TAB" data-why="Fresh recreation targets per model"></div>
   </div>
+</section>
 
+<!-- ===================== THE APP: Factory ===================== -->
+<section class="page" id="p-basics-factory">
+  <p class="eyebrow">THE APP &middot; 3 OF 6</p>
+  <h1>Factory</h1>
 
-  <h2>Factory</h2>
   <ul>
     <li>Where the video models live and where every render is created.</li>
     <li>Every past video is here. The first render of something that later gets millions of views starts on this page.</li>
     <li>Send a finished render onward with <strong>Ready to edit</strong> to reach the Editor.</li>
   </ul>
-  <div class="slots three">
+  <div class="slots screen">
     <div class="slot" data-slot="app-factory-1" data-label="FACTORY — GENERATE" data-why="Model, niche, references, prompt"></div>
     <div class="slot" data-slot="app-factory-2" data-label="FACTORY — FEED" data-why="Renders and what to do with them"></div>
     <div class="slot" data-slot="app-factory-3" data-label="READY TO EDIT" data-why="Sending a render onward"></div>
   </div>
+</section>
 
+<!-- ===================== THE APP: Pictures &mdash; Nano Banana ===================== -->
+<section class="page" id="p-basics-pictures">
+  <p class="eyebrow">THE APP &middot; 4 OF 6</p>
+  <h1>Pictures &mdash; Nano Banana</h1>
 
-  <h2>Pictures — Nano Banana</h2>
   <ul>
     <li>Where all images are made: reference images, backgrounds, posts, carousels.</li>
     <li><strong>Lifestyle</strong> is the newer feature and it matters. It adds candid images of her actual life — her room, her collectibles, her city, her friends — and can be attached to images when you select them. It is what turns a set of pictures into a person.</li>
     <li>Everyone uses different prompts. Some work consistently — ask for them. See <a href="#posts">the two standard prompts</a>.</li>
   </ul>
-  <div class="slots three">
+  <div class="slots screen">
     <div class="slot" data-slot="app-nano-1" data-label="NANO BANANA" data-why="Reference and post generation"></div>
     <div class="slot" data-slot="app-nano-2" data-label="LIFESTYLE TAB" data-why="Candid life attached to a set"></div>
     <div class="slot" data-slot="app-nano-3" data-label="A FINISHED BATCH" data-why="What comes back and what gets kept"></div>
@@ -840,8 +866,13 @@ maintain photo 2 photo quality and setting
     <span class="k">AI IS A SANDBOX</span>
     <p>Everything changes constantly and nothing works 100% of the time. Different jobs need different words and different tools. Take what works from everyone else, then build the method that suits you. Nobody here is going to hand you a prompt that works forever.</p>
   </div>
+</section>
 
-  <h2>Editor</h2>
+<!-- ===================== THE APP: Editor ===================== -->
+<section class="page" id="p-basics-editor">
+  <p class="eyebrow">THE APP &middot; 5 OF 6</p>
+  <h1>Editor</h1>
+
   <ul>
     <li>For videos that are <strong>not</strong> recreations and not CapCut videos.</li>
     <li>Template music, captions, light trims. It refines and sends off.</li>
@@ -849,14 +880,18 @@ maintain photo 2 photo quality and setting
     <li>Best use: simple videos of the model talking, showing personality or interests.</li>
     <li>Get videos into it from Factory → <strong>Ready to edit</strong>.</li>
   </ul>
-  <div class="slots three">
+  <div class="slots screen">
     <div class="slot" data-slot="app-editor-1" data-label="EDITOR" data-why="Captions, music, trim"></div>
     <div class="slot" data-slot="app-editor-2" data-label="TEMPLATES" data-why="What is available in there"></div>
     <div class="slot" data-slot="app-editor-3" data-label="FINISHED IN EDITOR" data-why="A simple talking video, done"></div>
   </div>
+</section>
 
+<!-- ===================== THE APP: Library ===================== -->
+<section class="page" id="p-basics-library">
+  <p class="eyebrow">THE APP &middot; 6 OF 6</p>
+  <h1>Library</h1>
 
-  <h2>Library</h2>
   <ul>
     <li>Every finished video and image lives here.</li>
     <li>See what is <strong>ready to post</strong>, <strong>scheduled</strong> and <strong>posted</strong>, per account and per person, so you can check how your videos performed.</li>
@@ -867,12 +902,11 @@ maintain photo 2 photo quality and setting
     <span class="k">GET THIS WRONG AND IT IS GONE</span>
     <p>Model and niche must be correct on every upload and every <em>Ready to post</em>, for images and videos alike. Misallocated files do not error — they just quietly land somewhere nobody is looking, and the scheduler never sees them.</p>
   </div>
-  <div class="slots three">
+  <div class="slots screen">
     <div class="slot" data-slot="app-lib-1" data-label="LIBRARY" data-why="Ready, scheduled, posted"></div>
     <div class="slot" data-slot="app-lib-2" data-label="UPLOAD VIDEO" data-why="Model, niche, platform"></div>
     <div class="slot" data-slot="app-lib-3" data-label="FILTERS" data-why="Finding a specific video later"></div>
   </div>
-
 </section>
 
 <!-- ============================= EVERYTHING ELSE ============================= -->
@@ -889,7 +923,7 @@ maintain photo 2 photo quality and setting
         <li>It is where proven, tested content comes from. Videos pulling hundreds of thousands to millions of views, sorted by niche, from any account added to it.</li>
         <li>Being built out further. Even now, use it constantly — it feeds the recreated half of everything you ship.</li>
       </ul>
-      <div class="slots three">
+      <div class="slots screen">
         <div class="slot" data-slot="app-spy-1" data-label="SPY" data-why="Performing videos by niche"></div>
         <div class="slot" data-slot="app-spy-2" data-label="A SPY FIND" data-why="What a good target looks like"></div>
         <div class="slot" data-slot="app-spy-3" data-label="ADDING AN ACCOUNT" data-why="Pointing it at a competitor"></div>
@@ -904,7 +938,7 @@ maintain photo 2 photo quality and setting
         <li>Tracks progress on projects and deliverables.</li>
         <li>New. Expect it to become central.</li>
       </ul>
-      <div class="slots"><div class="slot" data-slot="app-launch" data-label="LAUNCH CONTROL" data-why="Project and deliverable tracking"></div></div>
+      <div class="slots screen"><div class="slot" data-slot="app-launch" data-label="LAUNCH CONTROL" data-why="Project and deliverable tracking"></div></div>
     </div>
   </details>
 
@@ -915,7 +949,7 @@ maintain photo 2 photo quality and setting
         <li>Every live account for every niche, and how each one is progressing.</li>
         <li>Use it to check how videos are performing across a specific niche rather than a single post.</li>
       </ul>
-      <div class="slots"><div class="slot" data-slot="app-accounts" data-label="ACCOUNTS" data-why="Per-niche account performance"></div></div>
+      <div class="slots screen"><div class="slot" data-slot="app-accounts" data-label="ACCOUNTS" data-why="Per-niche account performance"></div></div>
     </div>
   </details>
 
@@ -926,7 +960,7 @@ maintain photo 2 photo quality and setting
         <li>API usage, cost per video, total spent, total created.</li>
         <li>Check it before a big batch, not after.</li>
       </ul>
-      <div class="slots"><div class="slot" data-slot="app-usage" data-label="USAGE" data-why="Cost per video and total spend"></div></div>
+      <div class="slots screen"><div class="slot" data-slot="app-usage" data-label="USAGE" data-why="Cost per video and total spend"></div></div>
     </div>
   </details>
 
@@ -938,7 +972,7 @@ maintain photo 2 photo quality and setting
         <li><strong>Review</strong> — where work you sent lands before it is closed.</li>
         <li><strong>Flow</strong> — the pipeline view of where everything currently is.</li>
       </ul>
-      <div class="slots three">
+      <div class="slots screen">
         <div class="slot" data-slot="app-copybot" data-label="COPY BOT" data-why=""></div>
         <div class="slot" data-slot="app-review" data-label="REVIEW" data-why=""></div>
         <div class="slot" data-slot="app-flow" data-label="FLOW" data-why=""></div>
@@ -1400,7 +1434,7 @@ Change only the character.</pre>
 var PAGES = {
   "start":"READ THIS FIRST","anatomy":"ANATOMY OF A VIDEO","types":"THE FOUR CONTENT TYPES",
   "refs":"REFERENCE IMAGES","posts":"POSTS & CAROUSELS","recreated":"RECREATED VIDEOS",
-  "builds":"FRESH VIDEOS / CAPCUT VIDEOS","basics":"BASICS — WHAT MATTERS NOW","rest":"EVERYTHING ELSE",
+  "builds":"FRESH VIDEOS / CAPCUT VIDEOS","basics-line":"THE APP — THE LINE","basics-script":"THE APP — SCRIPTING","basics-factory":"THE APP — FACTORY","basics-pictures":"THE APP — PICTURES — NANO BANANA","basics-editor":"THE APP — EDITOR","basics-library":"THE APP — LIBRARY","rest":"EVERYTHING ELSE",
   "w-refs":"MAKE REFERENCE IMAGES","w-carousel":"MAKE A CAROUSEL","w-factory":"FACTORY FROM PROMPT BANK",
   "w-recreate":"RECREATE FROM IDEAS","w-capcut":"FRESH VIDEO IN CAPCUT",
   "test":"THE TEST","bar":"WEEK ONE & THE BAR","index":"MEDIA SLOT INDEX"
