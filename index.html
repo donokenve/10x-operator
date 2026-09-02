@@ -1253,7 +1253,52 @@ Change only the character.</pre>
 
 <div class="lb" id="lb" role="dialog" aria-modal="true"></div>
 <div class="toast" id="toast"></div>
-<script type="application/json" id="seed">{}</script>
+<script type="application/json" id="seed">{
+ "build-top-1": {
+  "src": "media/build-top-1.mp4",
+  "tall": true
+ },
+ "build-top-2": {
+  "src": "media/build-top-2.mp4",
+  "tall": true
+ },
+ "build-top-3": {
+  "src": "media/build-top-3.mp4",
+  "tall": true
+ },
+ "post-feed-1": {
+  "src": "media/post-feed-1.webp",
+  "tall": true
+ },
+ "post-feed-2": {
+  "src": "media/post-feed-2.webp",
+  "tall": true
+ },
+ "post-feed-3": {
+  "src": "media/post-feed-3.webp",
+  "tall": true
+ },
+ "rec-top-1": {
+  "src": "media/rec-top-1.mp4",
+  "tall": true
+ },
+ "rec-top-3": {
+  "src": "media/rec-top-3.mp4",
+  "tall": true
+ },
+ "ref-set-1": {
+  "src": "media/ref-set-1.webp",
+  "tall": true
+ },
+ "ref-set-2": {
+  "src": "media/ref-set-2.webp",
+  "tall": true
+ },
+ "ref-set-3": {
+  "src": "media/ref-set-3.webp",
+  "tall": true
+ }
+}</script>
 
 <script>
 (function(){
@@ -1285,6 +1330,10 @@ function go(id){
   for(var j=0;j<navs.length;j++) navs[j].classList.toggle("on", navs[j].getAttribute("href")==="#"+id);
   document.getElementById("crumb").textContent="/ "+PAGES[id];
   CURRENT=id; paintPager();
+  /* Keep the address bar in step so a section can be linked directly.
+     replaceState rather than location.hash: a sandboxed preview treats a
+     hash change as a top-level navigation. */
+  try{ history.replaceState(null,"",location.pathname+location.search+"#"+id); }catch(e){}
   try{ window.scrollTo(0,0); }catch(e){}
   document.documentElement.scrollTop=0; document.body.scrollTop=0;
   if(id==="index") buildIndex();
@@ -1495,7 +1544,8 @@ function toast(msg){
 
 /* ---------------- boot ---------------- */
 initSlots();
-go("start");
+go((location.hash||"").slice(1) || "start");
+window.addEventListener("hashchange",function(){ go((location.hash||"").slice(1)); });
 })();
 </script>
 </body>
